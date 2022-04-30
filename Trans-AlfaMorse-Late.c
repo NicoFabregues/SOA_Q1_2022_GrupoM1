@@ -82,13 +82,14 @@ Grupo M1 - SOA
 #define MODO_ALFA                       99
 
 // Tiempos
-#define TIEMPO_MAX_PUNTO               500
-#define TIEMPO_MAX_RAYA               1500
-#define TIEMPO_ESPERA                  500
-#define TIEMPO_LED				       100
+#define TIEMPO_MAX_PUNTO               400
+#define TIEMPO_MAX_RAYA                800
+#define TIEMPO_ESPERA                 1200
+#define TIEMPO_LED				             100
+#define TIME_FOR_1CM                    29
 
 #define TAM_BUFFER_MORSE                 6
-#define TAM_BUFFER_LCD				    17
+#define TAM_BUFFER_LCD				          17
 
 // Defino las notas que sonaran en el buzzer
 #define NOTE_C4                        262
@@ -98,6 +99,8 @@ Grupo M1 - SOA
 #define NOTE_C4                        262
 #define NOTE_ONE_SECOND               1000
 #define BUZZER_VALOR_MIN                50
+#define TAM_MAX_POTENCIOMETRO         1023
+#define AJUSTE_FRECUENCIA              450
 
 //----------------------------------------------------------
 // Variables Globales.
@@ -150,7 +153,7 @@ const struct {char key, *value;} diccionario[] = {
     {'y', "-.--"},
     {'z', "--.."},
     {'1', ".----"},
-    {'2', "..-----"},
+    {'2', "..---"},
     {'3', "...--"},
     {'4', "....-"},
     {'5', "....."},
@@ -248,6 +251,7 @@ transition tabla_de_estados[MAX_ESTADOS][MAX_EVENTOS] =
 void init_()
 {
   DebugPrintEstado(estados[estado_actual], eventos[nuevo_evento]);
+  actualizar_brillo_LCD();
   // Sonido de bienvenida.
   sonar_buzzer();
   estado_actual = EST_INACTIVO;
@@ -256,14 +260,25 @@ void init_()
 void error()
 {
   estado_actual = EST_ERROR;
+
+  // Mensaje de error en display.
   lcd.clear();
   lcd.setCursor(0, LINEA_0_LCD);
   lcd.print(mensaje_error);
   lcd.setCursor(0, LINEA_1_LCD);
   lcd.print("\0");
+
   delay(TIEMPO_ESPERA*2);
+
   actualizar_lcd();
+
+
   DebugPrintEstado(estados[estado_actual], eventos[nuevo_evento]);
+
+  // Sueno alarma de error
+  sonar_buzzer();
+
+  // Evento para cambiar de estado
   nuevo_evento = EV_CONT;
   interrupcion = true;
 }
@@ -279,8 +294,11 @@ void traduccion_morse()
 
 void obtener_caracter()
 {
+  // Calculo el tiempo que estuvo pulsado el boton.
   delta = millis() - tiempo_previo;
   tiempo_previo = 0;
+
+  // Chequeo que el tamaño de buffer no se exceda.
   if(strlen(morse_buffer)>=TAM_BUFFER_MORSE-1)
   {
 	  strcpy(mensaje_error,"ERR:BUFFER LLENO");
@@ -288,21 +306,25 @@ void obtener_caracter()
       interrupcion = true;
 	  return;
   }
+
+  // En base a las franjas de tiempo definidas y el tiempo pulsado,
+  // escribo un punto, raya o fin de caracter.
   if( delta < TIEMPO_MAX_PUNTO )
   {
     strcat(morse_buffer, ".");
     Serial.print("Usted ingreso: '.'\n");
-	Serial.print("Buffer parcial: ");Serial.println(morse_buffer);
+	  Serial.print("Buffer parcial: ");Serial.println(morse_buffer);
   }
   else if( delta < TIEMPO_MAX_RAYA )
   {
     strcat(morse_buffer, "-");
     Serial.print("Usted ingreso: '-'\n");
-	Serial.print("Buffer parcial: ");Serial.println(morse_buffer);
+	  Serial.print("Buffer parcial: ");Serial.println(morse_buffer);
   }
   if( delta > TIEMPO_MAX_RAYA )
   {
     Serial.println("#Obteniendo Caracter#");
+    // Si llego al fin de caracter, cambio el evento para traducir.
     nuevo_evento = EV_MOSTRAR;
     interrupcion = true;
     estado_actual = EST_TRADUCIENDO_MORSE;
@@ -311,29 +333,33 @@ void obtener_caracter()
 
 void refresh_lcd()
 {
-  // Mostrar output por display.
+  // Busco traduccion
   char cad = decode(morse_buffer);
+
+  // Si encontre traduccion muestro por display
   if ( cad != '\0' )
   {
-    Serial.print("RESULT = ");Serial.print(morse_buffer);
-    Serial.print(" -> ");Serial.println(cad);Serial.println("\n");
-	if(strlen(lcd_buffer_inferior)<DATOS_BUS_LCD)
-		strncat(lcd_buffer_inferior,&cad,1);
-	else
-	{
-		strcpy(lcd_buffer_inferior, &lcd_buffer_inferior[1]);
-		strncat(lcd_buffer_inferior,&cad,1);
-	}
-	actualizar_lcd();
-	delay(TIEMPO_ESPERA);
+
+    if(strlen(lcd_buffer_inferior)<DATOS_BUS_LCD)
+    {
+      strncat(lcd_buffer_inferior,&cad,1);
+    }
+    else
+    {
+      strcpy(lcd_buffer_inferior, &lcd_buffer_inferior[1]);
+      strncat(lcd_buffer_inferior,&cad,1);
+    }
+    actualizar_lcd();
+    delay(TIEMPO_ESPERA);
   }
   else
   {
+    // Si NO encontre traduccion muestro error por display
     strcpy(lcd_buffer_superior,"NOT FOUND MORSE!");
-	actualizar_lcd();
-	delay(TIEMPO_ESPERA);
-	strcpy(lcd_buffer_superior,"Trad. Morse:");
-	actualizar_lcd();
+	  actualizar_lcd();
+	  delay(TIEMPO_ESPERA);
+	  strcpy(lcd_buffer_superior,"Trad. Morse:");
+	  actualizar_lcd();
   }
 
   // Reseteo buffer
@@ -347,39 +373,43 @@ void traduccion_alfa()
   // Traduccion de alfanumerico a morse.
   for(size_t i = 0; i < message.length(); i++)
   {
-	if(modo == MODO_MORSE)
-	{
-		strcpy(lcd_buffer_superior,"Trad. Morse:");
-		strcpy(lcd_buffer_inferior,"\0");
-		actualizar_lcd();
-		estado_actual = EST_INACTIVO;
-		return;
-	}
+    if(modo == MODO_MORSE)
+    {
+      // Si estoy en Modo morse, dejo de traducir alfa.
+      strcpy(lcd_buffer_superior,"Trad. Morse:");
+      strcpy(lcd_buffer_inferior,"\0");
+      actualizar_lcd();
+      estado_actual = EST_INACTIVO;
+      return;
+    }
+    // Busco traduccion.
     char* cadena_morse = encode(tolower(message.charAt(i)));
     if ( cadena_morse != "")
     {
+      // Si encontré traduccion, muestro por led y lcd.
       Serial.println(cadena_morse);
       mostrar_morse_por_led( cadena_morse );
-	  if( strlen(lcd_buffer_inferior) + strlen(cadena_morse) + 1 <= DATOS_BUS_LCD )
-	  {
-	 	strncat(lcd_buffer_inferior,cadena_morse, strlen(cadena_morse));
-		strcat(lcd_buffer_inferior,"|");
-	  }
-  	  else
-	  {
-	    strcpy(lcd_buffer_inferior, &lcd_buffer_inferior[strlen(cadena_morse) + 1]);
-		strncat(lcd_buffer_inferior, cadena_morse, strlen(cadena_morse));
-		strcat(lcd_buffer_inferior, "|");
-	  }
-	  actualizar_lcd();
+      if( strlen(lcd_buffer_inferior) + strlen(cadena_morse) + 1 <= DATOS_BUS_LCD )
+      {
+        strncat(lcd_buffer_inferior,cadena_morse, strlen(cadena_morse));
+        strcat(lcd_buffer_inferior,"|");
+      }
+      else
+      {
+        strcpy(lcd_buffer_inferior, &lcd_buffer_inferior[strlen(cadena_morse) + 1]);
+        strncat(lcd_buffer_inferior, cadena_morse, strlen(cadena_morse));
+        strcat(lcd_buffer_inferior, "|");
+      }
+      actualizar_lcd();
     }
     else
     {
-	  strcpy(lcd_buffer_superior, "NOT FOUND ALFA!!" );
-	  actualizar_lcd();
-	  delay(TIEMPO_ESPERA);
-	  strcpy(lcd_buffer_superior, "Trad. Alfanum:" );
-	  actualizar_lcd();
+      // Si no encontre traduccion, muestro error.
+      strcpy(lcd_buffer_superior, "NOT FOUND ALFA!!" );
+      actualizar_lcd();
+      delay(TIEMPO_ESPERA);
+      strcpy(lcd_buffer_superior, "Trad. Alfanum:" );
+      actualizar_lcd();
     }
 
   }
@@ -410,50 +440,27 @@ void mostrar_morse_por_led(const char* morse)
   {
     size_t j = i > CANTIDAD_LEDS_NPX / 3 ? 0 : i;
     if(modo == MODO_MORSE)
+    {
       return;
+    }
     led_estado = !led_estado;
     digitalWrite(PIN_ACT_LED, led_estado);
     morse[i] == '.' ? delay(TIEMPO_MAX_PUNTO) : morse[i] == '-' ? delay(TIEMPO_MAX_RAYA) : delay(TIEMPO_LED);
     led_estado = !led_estado;
     digitalWrite(PIN_ACT_LED, led_estado);
 
-    //Muestro Simbolo Morse por NeoPixel
+    // Muestro Simbolo Morse por NeoPixel
     signo_act= morse[i];
     mostrarSimboloMorseNeoPX(j, signo_act);
     mostrarSimboloMorseNeoPX(j + 1, signo_act);
     mostrarSimboloMorseNeoPX(j + 2, signo_act);
     delay(TIEMPO_LED);
 
-    //Limpio memoria actual
+    // Limpio memoria actual
     barraNeoPX.clear();
   }
   delay(TIEMPO_LED*2);
 }
-
-/*
-void activarArcoIrisRGB()
-{
-  // Activar arcoiris RGB de procesamiento
-  barraNeoPX.clear();
-  // Enciende los Leds de izquierda a derecha
-  for(int i=0; i<CANTIDAD_LEDS_NPX; i+)
-  {
-    barraNeoPX.setPixelColor(i, barraNeoPX.Color(random(0,255), random(0,255), random(0,255)));
-    barraNeoPX.show();
-    delay(50);
-    //pixels.setPixelColor(i, pixels.Color(0, 0, 0));
-  }
-  int i=CANTIDAD_LEDS_NPX;
-  // Apaga los Leds de derecha a Izquierda
-  while(i>0)
-  {
-    barraNeoPX.setPixelColor(i-1, barraNeoPX.Color(random(0,255), random(0,255), random(0,255)));
-    barraNeoPX.setPixelColor(i, barraNeoPX.Color(0, 0, 0));
-    barraNeoPX.show();
-    delay(50);
-    i--;
-  }
-}*/
 
 void mostrarSimboloMorseNeoPX(size_t led, char simbolo)
 {
@@ -463,7 +470,7 @@ void mostrarSimboloMorseNeoPX(size_t led, char simbolo)
     nuevo_evento = EV_ERROR;
     return;
   }
-  // Enciende el Led
+  // Muestro simbolo en neopixel
   if(simbolo == '.')
   {
     barraNeoPX.setPixelColor(led, barraNeoPX.Color(BLUE_COLOR));
@@ -515,12 +522,13 @@ void actualizar_brillo_LCD()
 
 void actualizar_lcd()
 {
+  // Funcion para actualizar el display.
   lcd.clear();
   lcd.setCursor(0, LINEA_0_LCD);
   lcd.print(lcd_buffer_superior);
   lcd.setCursor(0, LINEA_1_LCD);
 
-  strcpy(lcd_buffer_inferior,lcd_buffer_inferior);
+  strcpy(lcd_buffer_inferior, lcd_buffer_inferior);
 
   lcd.print(lcd_buffer_inferior);
 }
@@ -530,8 +538,7 @@ long calcular_distancia_por_ultrasonido(long duracion_onda)
   // Se divide la duracion de onda leida por la distancia recorrida de la
   // velocidad del sonido por cm y se divide a la mitad ya que la onda realiza
   // un viaje de ida y vuelta al sensor.
-  // 29 es la cantidad de ms que tarda en recorrer 1cm.
-  return duracion_onda / 29 / 2;
+  return duracion_onda / TIME_FOR_1CM / 2;
 }
 
 void sonar_buzzer()
@@ -567,7 +574,7 @@ bool verificar_sensor_brillo()
 
 float leer_volumen_buzzer()
 {
-  return (float)analogRead(0) / 1023 * 450 + BUZZER_VALOR_MIN;
+  return (float)analogRead(0) / TAM_MAX_POTENCIOMETRO * AJUSTE_FRECUENCIA + BUZZER_VALOR_MIN;
 }
 
 //----------------------------------------------------------
@@ -669,8 +676,7 @@ void maquina_de_estados()
     {
       DebugPrintEstado(estados[estado_actual], eventos[nuevo_evento]);
     }
-    // verificar_sensor_brillo();
-    // refresh_led();
+    actualizar_brillo_LCD();
     tabla_de_estados[estado_actual][nuevo_evento]();
   }
   else
@@ -700,10 +706,10 @@ void isr_modo()
   {
     morse_buffer[0] = '\0';
     serial_flush();
-	strcpy(lcd_buffer_superior, "Trad. Morse:");
-	strcpy(lcd_buffer_inferior, "\0");
-	actualizar_lcd();
-	modo = MODO_MORSE ;
+	  strcpy(lcd_buffer_superior, "Trad. Morse:");
+	  strcpy(lcd_buffer_inferior, "\0");
+	  actualizar_lcd();
+	  modo = MODO_MORSE ;
   }
   else
   {
@@ -712,7 +718,7 @@ void isr_modo()
     strcpy(lcd_buffer_superior, "Trad. Alfanum:");
     strcpy(lcd_buffer_inferior, "\0");
     actualizar_lcd();
-	modo = MODO_ALFA;
+	  modo = MODO_ALFA;
   }
 }
 
