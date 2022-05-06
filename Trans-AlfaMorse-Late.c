@@ -669,21 +669,34 @@ void obtener_nuevo_evento()
   }
 
   // Leo serial para traducir.
-  if (modo == MODO_ALFA)
-  {
-    if (Serial.available() <= 0 && (buffer_lectura = Serial.readString()) != "")
-    {
-      message=buffer_lectura;
-	    serial_flush();
+	if (Serial.available())
+	{
+	  if ((buffer_lectura = Serial.readString()) != "")
+	  {
+      message = buffer_lectura;
+      serial_flush();
       Serial.print("Se ingreso: ");
       Serial.println(message);
-	    tamanio_entrada=strlen(&message[0]);
-	    caracter_numero=0;
-      nuevo_evento = EV_EMP_ALFA;
-      interrupcion = true;
-      return;
-    }
-  }
+      if (modo == MODO_ALFA)
+      {
+        tamanio_entrada = strlen(&message[0]);
+        caracter_numero = 0;
+        nuevo_evento = EV_EMP_ALFA;
+        interrupcion = true;
+        return;
+      }
+	  }
+	}
+
+	if(modo == MODO_MORSE && message != "")
+	{
+		barraNeoPX.clear();
+		(message.substring(0, TAM_BUFFER_MORSE - 1)).toCharArray(morse_buffer, 6);
+		message=message.substring(TAM_BUFFER_MORSE - 1, message.length() + 1);
+		nuevo_evento = EV_MOSTRAR;
+		interrupcion = true;
+		estado_actual = EST_TRADUCIENDO_MORSE;
+	}
 
   if (interrupcion == true)
   {
@@ -729,10 +742,11 @@ void isr()
 
 void isr_modo()
 {
+  message="";
+  morse_buffer[0] = '\0';
+  serial_flush();
   if (modo == MODO_ALFA)
   {
-    morse_buffer[0] = '\0';
-    serial_flush();
     strcpy(lcd_buffer_superior, "Trad. Morse:");
     strcpy(lcd_buffer_inferior, "\0");
     actualizar_lcd();
@@ -740,13 +754,13 @@ void isr_modo()
   }
   else
   {
-    morse_buffer[0] = '\0';
-    serial_flush();
     strcpy(lcd_buffer_superior, "Trad. Alfanum:");
     strcpy(lcd_buffer_inferior, "\0");
     actualizar_lcd();
     modo = MODO_ALFA;
-  }
+	}
+  // Agregar evento para limpiar.
+  estado_actual = EST_INACTIVO;
 }
 
 //----------------------------------------------------------
