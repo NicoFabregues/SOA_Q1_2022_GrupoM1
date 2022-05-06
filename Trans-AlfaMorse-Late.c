@@ -40,67 +40,67 @@ Grupo M1 - SOA
 // Definición de constantes.
 
 // Display
-#define PIN_RS_LCD 12
-#define PIN_ENABLE_LCD 11
-#define PIN_DB7_LCD 4
-#define PIN_DB6_LCD 5
-#define PIN_DB5_LCD 6
-#define PIN_DB4_LCD 7
-#define DATOS_BUS_LCD 16
-#define LINEA_0_LCD 0
-#define LINEA_1_LCD 1
+#define PIN_ENABLE_LCD                         11
+#define PIN_RS_LCD                             12
+#define PIN_DB7_LCD                             4
+#define PIN_DB6_LCD                             5
+#define PIN_DB5_LCD                             6
+#define PIN_DB4_LCD                             7
+#define DATOS_BUS_LCD                          16
+#define LINEA_0_LCD                             0
+#define LINEA_1_LCD                             1
 
-#define BRILLO_BAJO 0
-#define BRILLO_MEDIO 64
-#define BRILLO_ALTO 128
-#define UMBRAL_DISTANCIA_MIN 50
-#define UMBRAL_DISTANCIA_MAX 140
+#define BRILLO_BAJO                             0
+#define BRILLO_MEDIO                           64
+#define BRILLO_ALTO                           128
+#define UMBRAL_DISTANCIA_MIN                   50
+#define UMBRAL_DISTANCIA_MAX                  140
 
 // Pines
-#define PIN_ACT_BRILLOLCD 10
-#define PIN_ACT_NEOPIXEL4 8
-#define PIN_ACT_BUZZER 13
-#define PIN_ACT_LED 9
-#define PIN_SENSOR_POTENCIOMETRO A0
-#define PIN_SENSOR_DISTANCIA A1
-#define PIN_SENSOR_MODO 3
-#define PIN_SENSOR_PULSADOR 2
+#define PIN_ACT_NEOPIXEL4                       8
+#define PIN_ACT_LED                             9
+#define PIN_ACT_BRILLOLCD                      10
+#define PIN_ACT_BUZZER                         13
+#define PIN_SENSOR_POTENCIOMETRO               A0
+#define PIN_SENSOR_DISTANCIA                   A1
+#define PIN_SENSOR_PULSADOR                     2
+#define PIN_SENSOR_MODO                         3
 
 // Sensores
-#define SENSOR_PULSADOR 0
-#define SENSOR_MODO 1
-#define SENSOR_DISTANCIA 2
-#define SENSOR_POTENCIOMETRO 3
-#define MAX_CANT_SENSORES 4
-#define ESTADO_SENSOR_OK 108
+#define SENSOR_PULSADOR                         0
+#define SENSOR_MODO                             1
+#define SENSOR_DISTANCIA                        2
+#define SENSOR_POTENCIOMETRO                    3
+#define MAX_CANT_SENSORES                       4
+#define ESTADO_SENSOR_OK                      108
 
 // Serial consola
-#define SERIAL_SPEED 9600
+#define SERIAL_SPEED                         9600
 
 // Modos
-#define MODO_MORSE 98
-#define MODO_ALFA 99
+#define MODO_MORSE                             98
+#define MODO_ALFA                              99
 
 // Tiempos
-#define TIEMPO_MAX_PUNTO 400
-#define TIEMPO_MAX_RAYA 800
-#define TIEMPO_ESPERA 1200
-#define TIEMPO_LED 100
-#define TIME_FOR_1CM 29
+#define TIEMPO_MAX_PUNTO                      400
+#define TIEMPO_MAX_RAYA                       800
+#define TIEMPO_ESPERA                        1200
+#define TIEMPO_LED                            100
+#define TIME_FOR_1CM                           29
 
-#define TAM_BUFFER_MORSE 6
-#define TAM_BUFFER_LCD 17
+#define TAM_BUFFER_MORSE                        6
+#define TAM_BUFFER_LCD                         17
 
 // Defino las notas que sonaran en el buzzer
-#define NOTE_C4 262
-#define NOTE_G3 196
-#define NOTE_A3 220
-#define NOTE_B3 247
-#define NOTE_C4 262
-#define NOTE_ONE_SECOND 1000
-#define BUZZER_VALOR_MIN 50
-#define TAM_MAX_POTENCIOMETRO 1023
-#define AJUSTE_FRECUENCIA 450
+#define NOTE_C4                               262
+#define NOTE_G3                               196
+#define NOTE_A3                               220
+#define NOTE_B3                               247
+#define NOTE_C4                               262
+#define NOTE_ONE_SECOND                      1000
+#define BUZZER_VALOR_MIN                       50
+#define TAM_MAX_POTENCIOMETRO                1023
+#define AJUSTE_FRECUENCIA                     450
 
 //----------------------------------------------------------
 // Variables Globales.
@@ -351,7 +351,7 @@ void obtener_caracter()
   if (delta > TIEMPO_MAX_RAYA)
   {
   	barraNeoPX.clear();
-	  led_numero=0;
+	  led_numero = 0;
     Serial.println("#Obteniendo Caracter#");
     // Si llego al fin de caracter, cambio el evento para traducir.
     nuevo_evento = EV_MOSTRAR;
@@ -478,6 +478,7 @@ void mostrarSimboloMorseNeoPX(size_t led, char simbolo)
     nuevo_evento = EV_ERROR;
     return;
   }
+
   // Muestro simbolo en neopixel
   if (simbolo == '.')
   {
@@ -496,7 +497,9 @@ void mostrarSimboloMorseNeoPX(size_t led, char simbolo)
 
 void actualizar_brillo_lcd()
 {
+  // Cambio el nivel de brillo de la pantalla
   analogWrite(PIN_ACT_BRILLOLCD, brillo_actual);
+
   if (estado_actual == EST_TRADUCIENDO_ALFA)
   {
     // Esto es para que si cambio el brillo mientras se traduce alfa,
@@ -520,16 +523,9 @@ void actualizar_lcd()
 
 void sonar_buzzer()
 {
-  // Itero las notas
-  //for (int nota = 0; nota < 8; nota++)
-  //{
-    // Calculo la duracion de la nota
-    int duracion = NOTE_ONE_SECOND / duracion_de_notas[1];
-    tone(PIN_ACT_BUZZER, 100, duracion);
-
-    // Apago el buzzer.
-    // noTone(PIN_ACT_BUZZER);
-  //}
+  // Sueno una nota por el buzzer
+  int duracion = NOTE_ONE_SECOND / duracion_de_notas[1];
+  tone(PIN_ACT_BUZZER, 100, duracion);
 }
 
 //----------------------------------------------------------
@@ -682,7 +678,6 @@ void obtener_nuevo_evento()
         tamanio_entrada = strlen(&message[0]);
         caracter_numero = 0;
         nuevo_evento = EV_EMP_ALFA;
-        interrupcion = true;
         return;
       }
 	  }
@@ -694,8 +689,8 @@ void obtener_nuevo_evento()
 		(message.substring(0, TAM_BUFFER_MORSE - 1)).toCharArray(morse_buffer, 6);
 		message=message.substring(TAM_BUFFER_MORSE - 1, message.length() + 1);
 		nuevo_evento = EV_MOSTRAR;
-		interrupcion = true;
 		estado_actual = EST_TRADUCIENDO_MORSE;
+    return;
 	}
 
   if (interrupcion == true)
