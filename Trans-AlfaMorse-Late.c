@@ -59,8 +59,8 @@ Grupo M1 - SOA
 // Pines
 #define PIN_ACT_BRILLOLCD 10
 #define PIN_ACT_NEOPIXEL4 8
-#define PIN_ACT_BUZZER 9
-#define PIN_ACT_LED 13
+#define PIN_ACT_BUZZER 13
+#define PIN_ACT_LED 9
 #define PIN_SENSOR_POTENCIOMETRO A0
 #define PIN_SENSOR_DISTANCIA A1
 #define PIN_SENSOR_MODO 3
@@ -742,7 +742,7 @@ void isr()
 
 void isr_modo()
 {
-  message="";
+  message = "";
   morse_buffer[0] = '\0';
   serial_flush();
   if (modo == MODO_ALFA)
