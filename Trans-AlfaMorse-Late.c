@@ -1,5 +1,5 @@
 /*
-Trans-AlfaMorse-Late v1.0
+Trans-AlfaMorse-Late v1.1
 Grupo M1 - SOA
 */
 
@@ -105,6 +105,7 @@ Grupo M1 - SOA
 //----------------------------------------------------------
 // Variables Globales.
 int led_estado;
+int brillo_actual;
 int modo;
 long delta;
 long tiempo_previo;
@@ -246,25 +247,25 @@ enum events
   EV_SOLTADO,
   EV_EMP_ALFA,
   EV_MOSTRAR,
+  EV_ACTUALIZAR_LCD,
   EV_ERROR,
   EV_UNKNOWN
 } nuevo_evento;
-String eventos[] = {"EV_CONT", "EV_PULSADO", "EV_SOLTADO", "EV_EMP_ALFA", "EV_MOSTRAR", "EV_ERROR", "EV_UNKNOWN"};
+String eventos[] = {"EV_CONT", "EV_PULSADO", "EV_SOLTADO", "EV_EMP_ALFA", "EV_MOSTRAR", "EV_ACTUALIZAR_LCD", "EV_ERROR", "EV_UNKNOWN"};
 
 #define MAX_ESTADOS 5
-#define MAX_EVENTOS 6
+#define MAX_EVENTOS 7
 
 typedef void (*transition)();
 
-transition tabla_de_estados[MAX_ESTADOS][MAX_EVENTOS] =
-    {
-        {init_, error, error, error, error, error},                                // EST_INICIO
-        {none, traduccion_morse, obtener_caracter, traduccion_alfa, error, error}, // EST_INACTIVO
-        {none, error, error, error, refresh_lcd, error},                           // EST_TRADUCIENDO_MORSE
-        {none, error, error, error, refresh_led, error},                           // EST_TRADUCIENDO_ALFA
-        {reset_sensors, error, error, error, error, error}                         // EST_ERROR
+transition tabla_de_estados[MAX_ESTADOS][MAX_EVENTOS] = {
+    {init_          , error             , error             , error             , error         , actualizar_brillo_lcd , error     },  // EST_INICIO
+    {none           , traduccion_morse  , obtener_caracter  , traduccion_alfa   , error         , actualizar_brillo_lcd , error     },  // EST_INACTIVO
+    {none           , error             , error             , error             , refresh_lcd   , actualizar_brillo_lcd , error     },  // EST_TRADUCIENDO_MORSE
+    {none           , error             , error             , error             , refresh_led   , actualizar_brillo_lcd , error     },  // EST_TRADUCIENDO_ALFA
+    {reset_sensors  , error             , error             , error             , error         , error                 , error     }   // EST_ERROR
 
-        // EV_CONT          , EV_PULSADO          , EV_SOLTADO      , EV_EMP_ALFA     , EV_MOSTRAR  , EV_ERROR
+    // EV_CONT      , EV_PULSADO        , EV_SOLTADO        , EV_EMP_ALFA       , EV_MOSTRAR    , EV_ACTUALIZAR_LCD     , EV_ERROR
 };
 
 //----------------------------------------------------------
@@ -273,7 +274,6 @@ transition tabla_de_estados[MAX_ESTADOS][MAX_EVENTOS] =
 void init_()
 {
   DebugPrintEstado(estados[estado_actual], eventos[nuevo_evento]);
-  actualizar_brillo_LCD();
   // Sonido de bienvenida.
   sonar_buzzer();
   estado_actual = EST_INACTIVO;
@@ -470,8 +470,6 @@ void mostrar_morse_por_led(const char *morse)
     signo_act = morse[i];
     mostrarSimboloMorseNeoPX(j, signo_act);
     delay(TIEMPO_LED);
-
-    // Limpio memoria actual
   }
   delay(TIEMPO_LED * 2);
 }
@@ -500,44 +498,20 @@ void mostrarSimboloMorseNeoPX(size_t led, char simbolo)
   barraNeoPX.show();
 }
 
-void actualizar_brillo_LCD()
+void actualizar_brillo_lcd()
 {
-  long tiempo_vta, distcm;
-
-  // Emito onda ultrasonido
-  pinMode(PIN_SENSOR_DISTANCIA, OUTPUT);
-  digitalWrite(PIN_SENSOR_DISTANCIA, LOW);
-  delayMicroseconds(2);
-  digitalWrite(PIN_SENSOR_DISTANCIA, HIGH);
-  delayMicroseconds(5);
-  digitalWrite(PIN_SENSOR_DISTANCIA, LOW);
-
-  // Detecto el regreso de la onda
-  pinMode(PIN_SENSOR_DISTANCIA, INPUT);
-  tiempo_vta = pulseIn(PIN_SENSOR_DISTANCIA, HIGH);
-
-  // Convertir tiempo en distancia.
-  distcm = calcular_distancia_por_ultrasonido(tiempo_vta);
-
-  // Prendo el led si pasa el umbral
-  if (distcm < UMBRAL_DISTANCIA_MIN)
+  analogWrite(PIN_ACT_BRILLOLCD, brillo_actual);
+  if (estado_actual == EST_TRADUCIENDO_ALFA)
   {
-    analogWrite(PIN_ACT_BRILLOLCD, BRILLO_ALTO);
-  }
-  else if (distcm < UMBRAL_DISTANCIA_MAX)
-  {
-    analogWrite(PIN_ACT_BRILLOLCD, BRILLO_MEDIO);
-  }
-  else
-  {
-    analogWrite(PIN_ACT_BRILLOLCD, BRILLO_BAJO);
+    // Esto es para que si cambio el brillo mientras se traduce alfa,
+    // no se pierda el evento de mostrar alfa.
+    nuevo_evento = EV_MOSTRAR;
   }
 }
 
 void actualizar_lcd()
 {
   // Funcion para actualizar el display.
-  actualizar_brillo_LCD();
   lcd.clear();
   lcd.setCursor(0, LINEA_0_LCD);
   lcd.print(lcd_buffer_superior);
@@ -581,10 +555,46 @@ void sonar_buzzer()
 //----------------------------------------------------------
 // Funciones sensores
 
-bool verificar_sensor_brillo()
+bool leer_sensor_distancia()
 {
-  actualizar_brillo_LCD();
-  return false;
+  long tiempo_vta, distcm;
+
+  // Emito onda ultrasonido
+  pinMode(PIN_SENSOR_DISTANCIA, OUTPUT);
+  digitalWrite(PIN_SENSOR_DISTANCIA, LOW);
+  delayMicroseconds(2);
+  digitalWrite(PIN_SENSOR_DISTANCIA, HIGH);
+  delayMicroseconds(5);
+  digitalWrite(PIN_SENSOR_DISTANCIA, LOW);
+
+  // Detecto el regreso de la onda
+  pinMode(PIN_SENSOR_DISTANCIA, INPUT);
+  tiempo_vta = pulseIn(PIN_SENSOR_DISTANCIA, HIGH);
+
+  // Convertir tiempo en distancia.
+  distcm = calcular_distancia_por_ultrasonido(tiempo_vta);
+
+  // Prendo el led si pasa el umbral
+  if (distcm < UMBRAL_DISTANCIA_MIN && brillo_actual != BRILLO_ALTO)
+  {
+    brillo_actual = BRILLO_ALTO;
+    nuevo_evento = EV_ACTUALIZAR_LCD;
+  }
+  else if (distcm < UMBRAL_DISTANCIA_MAX && brillo_actual != BRILLO_MEDIO)
+  {
+    brillo_actual = BRILLO_MEDIO;
+    nuevo_evento = EV_ACTUALIZAR_LCD;
+  }
+  else if (distcm > UMBRAL_DISTANCIA_MAX && brillo_actual != BRILLO_BAJO)
+  {
+    brillo_actual = BRILLO_BAJO;
+    nuevo_evento = EV_ACTUALIZAR_LCD;
+  }
+  else
+  {
+    return false; // No hubo cambios
+  }
+  return true; // Hay evento
 }
 
 float leer_volumen_buzzer()
@@ -645,6 +655,8 @@ void do_init()
   // Inicializa estado de LED.
   led_estado = LOW;
 
+  brillo_actual = BRILLO_ALTO;
+
   // Interrupciones
   attachInterrupt(digitalPinToInterrupt(PIN_SENSOR_PULSADOR), isr, CHANGE);
   attachInterrupt(digitalPinToInterrupt(PIN_SENSOR_MODO), isr_modo, RISING);
@@ -657,6 +669,11 @@ void obtener_nuevo_evento()
   {
     interrupcion = true;
     nuevo_evento = EV_SOLTADO;
+  }
+
+  if (leer_sensor_distancia())
+  {
+    return;
   }
 
   // Leo serial para traducir.
@@ -691,7 +708,6 @@ void maquina_de_estados()
     {
       DebugPrintEstado(estados[estado_actual], eventos[nuevo_evento]);
     }
-    actualizar_brillo_LCD();
     tabla_de_estados[estado_actual][nuevo_evento]();
   }
   else
