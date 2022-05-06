@@ -106,6 +106,7 @@ Grupo M1 - SOA
 // Variables Globales.
 int led_estado;
 int brillo_actual;
+float valor_potenciometro;
 int modo;
 long delta;
 long tiempo_previo;
@@ -533,23 +534,15 @@ long calcular_distancia_por_ultrasonido(long duracion_onda)
 void sonar_buzzer()
 {
   // Itero las notas
-  for (int nota = 0; nota < 8; nota++)
-  {
-    float volumen = leer_volumen_buzzer();
+  //for (int nota = 0; nota < 8; nota++)
+  //{
+    // Calculo la duracion de la nota
+    int duracion = NOTE_ONE_SECOND / duracion_de_notas[1];
+    tone(PIN_ACT_BUZZER, 100, duracion);
 
-    if (volumen != BUZZER_VALOR_MIN)
-    {
-      // Calculo la duracion de la nota
-      int duracion = NOTE_ONE_SECOND / duracion_de_notas[nota];
-      tone(PIN_ACT_BUZZER, melodia[nota] - volumen, duracion);
-
-      // Para distinguir las notas, dejo un delay del 130% de la duracion de la nota.
-      int pausa_entre_notas = duracion * 1.30;
-      delay(pausa_entre_notas);
-    }
     // Apago el buzzer.
-    noTone(PIN_ACT_BUZZER);
-  }
+    // noTone(PIN_ACT_BUZZER);
+  //}
 }
 
 //----------------------------------------------------------
@@ -597,9 +590,14 @@ bool leer_sensor_distancia()
   return true; // Hay evento
 }
 
-float leer_volumen_buzzer()
+bool leer_sensor_potenciometro()
 {
-  return (float)analogRead(PIN_SENSOR_POTENCIOMETRO) / TAM_MAX_POTENCIOMETRO * AJUSTE_FRECUENCIA + BUZZER_VALOR_MIN;
+  if (valor_potenciometro != (float)analogRead(PIN_SENSOR_POTENCIOMETRO))
+  {
+    valor_potenciometro = (float)analogRead(PIN_SENSOR_POTENCIOMETRO);
+    return true; // Cambio.
+  }
+  return false; // No hubo cambios
 }
 
 //----------------------------------------------------------
@@ -671,7 +669,7 @@ void obtener_nuevo_evento()
     nuevo_evento = EV_SOLTADO;
   }
 
-  if (leer_sensor_distancia())
+  if (leer_sensor_distancia() || leer_sensor_potenciometro())
   {
     return;
   }
