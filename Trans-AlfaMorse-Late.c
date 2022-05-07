@@ -117,7 +117,7 @@ char lcd_buffer_inferior[TAM_BUFFER_LCD];
 char mensaje_error[TAM_BUFFER_LCD];
 int elementos_lcd;
 char *cadena_morse;
-String message = "";
+String message;
 int tamanio_entrada;
 int caracter_numero;
 int led_numero;
@@ -168,6 +168,7 @@ const struct
     {'7', "--..."},
     {'8', "---.."},
     {'9', "----."},
+	{'0', "-----"},
     {' ', " "}};
 size_t diccionario_size = sizeof(diccionario) / sizeof(*diccionario);
 
@@ -253,24 +254,26 @@ enum events
   EV_EMP_ALFA,
   EV_MOSTRAR,
   EV_ACTUALIZAR_LCD,
+  EV_TECLADO,
+  EV_MODO,
   EV_ERROR,
   EV_UNKNOWN
 } nuevo_evento;
-String eventos[] = {"EV_CONT", "EV_PULSADO", "EV_SOLTADO", "EV_EMP_ALFA", "EV_MOSTRAR", "EV_ACTUALIZAR_LCD", "EV_ERROR", "EV_UNKNOWN"};
+String eventos[] = {"EV_CONT", "EV_PULSADO", "EV_SOLTADO", "EV_EMP_ALFA", "EV_MOSTRAR", "EV_ACTUALIZAR_LCD", "EV_TECLADO", "EV_MODO", "EV_ERROR", "EV_UNKNOWN"};
 
 #define MAX_ESTADOS 5
-#define MAX_EVENTOS 7
+#define MAX_EVENTOS 9
 
 typedef void (*transition)();
 
 transition tabla_de_estados[MAX_ESTADOS][MAX_EVENTOS] = {
-    {init_          , error             , error             , error             , error         , actualizar_brillo_lcd , error     },  // EST_INICIO
-    {none           , traduccion_morse  , obtener_caracter  , traduccion_alfa   , error         , actualizar_brillo_lcd , error     },  // EST_INACTIVO
-    {none           , error             , error             , error             , mostrar_alfa  , actualizar_brillo_lcd , error     },  // EST_TRADUCIENDO_MORSE
-    {traduccion_alfa, error             , error             , error             , mostrar_morse , actualizar_brillo_lcd , error     },  // EST_TRADUCIENDO_ALFA
-    {reset_sensors  , error             , error             , error             , error         , error                 , error     }   // EST_ERROR
+    {init_          , error             , error             , error             , error         , actualizar_brillo_lcd , error   		, cambiar_modo    , error     },  // EST_INICIO
+    {none           , traduccion_morse  , obtener_caracter  , traduccion_alfa   , error         , actualizar_brillo_lcd , leer_teclado  , cambiar_modo    , error     },  // EST_INACTIVO
+    {none           , error             , error             , error             , mostrar_alfa  , actualizar_brillo_lcd , leer_teclado	, cambiar_modo    , error     },  // EST_TRADUCIENDO_MORSE
+    {traduccion_alfa, error             , error             , error             , mostrar_morse , actualizar_brillo_lcd , leer_teclado	, cambiar_modo    , error     },  // EST_TRADUCIENDO_ALFA
+    {reset_sensors  , error             , error             , error             , error         , error                 , error			, cambiar_modo    , error     }   // EST_ERROR
 
-    // EV_CONT      , EV_PULSADO        , EV_SOLTADO        , EV_EMP_ALFA       , EV_MOSTRAR    , EV_ACTUALIZAR_LCD     , EV_ERROR
+    // EV_CONT      , EV_PULSADO        , EV_SOLTADO        , EV_EMP_ALFA       , EV_MOSTRAR    , EV_ACTUALIZAR_LCD     , EV_TECLADO     , EV_MODO     	, EV_ERROR
 };
 
 //----------------------------------------------------------
@@ -410,9 +413,8 @@ void traduccion_alfa()
 	}
 	// Traduccion de alfanumerico a morse.
 	// Busco traduccion.
-  	char aux = message[caracter_numero];
 	strcpy(morse_buffer, encode(tolower(message[caracter_numero])));
-	if (morse_buffer != "")
+	if (strcmp(morse_buffer,""))
 	{
 		nuevo_evento = EV_MOSTRAR;
 		interrupcion = true;
@@ -446,6 +448,56 @@ void mostrar_morse()
 	}
 	strcpy(lcd_buffer_superior, "Trad. Alfanum:");
 	actualizar_lcd();
+}
+
+void leer_teclado()
+{
+	if ((buffer_lectura = Serial.readString()) != "")
+	{
+		message = buffer_lectura;
+		serial_flush();
+		Serial.print("Se ingreso: ");
+		Serial.println(message);
+		if (modo == MODO_ALFA)
+		{
+			tamanio_entrada = strlen(&message[0]);
+			caracter_numero = 0;
+			nuevo_evento = EV_EMP_ALFA;
+		    interrupcion = true;
+			return;
+		}
+		else
+		{
+			interrupcion = true;
+			barraNeoPX.clear();
+			(message.substring(0, TAM_BUFFER_MORSE - 1)).toCharArray(morse_buffer, 6);
+			message=message.substring(TAM_BUFFER_MORSE - 1, message.length() + 1);
+			nuevo_evento = EV_MOSTRAR;
+			estado_actual = EST_TRADUCIENDO_MORSE;
+		}
+	}
+}
+
+void cambiar_modo()
+{
+  message = "";
+  morse_buffer[0] = '\0';
+  serial_flush();
+  estado_actual = EST_INACTIVO;
+  if (modo == MODO_ALFA)
+  {
+    strcpy(lcd_buffer_superior, "Trad. Morse:");
+    strcpy(lcd_buffer_inferior, "\0");
+    actualizar_lcd();
+    modo = MODO_MORSE;
+  }
+  else
+  {
+    strcpy(lcd_buffer_superior, "Trad. Alfanum:");
+    strcpy(lcd_buffer_inferior, "\0");
+    actualizar_lcd();
+    modo = MODO_ALFA;
+  }
 }
 
 void reset_sensors()
@@ -667,30 +719,8 @@ void obtener_nuevo_evento()
   // Leo serial para traducir.
 	if (Serial.available())
 	{
-	  if ((buffer_lectura = Serial.readString()) != "")
-	  {
-      message = buffer_lectura;
-      serial_flush();
-      Serial.print("Se ingreso: ");
-      Serial.println(message);
-      if (modo == MODO_ALFA)
-      {
-        tamanio_entrada = strlen(&message[0]);
-        caracter_numero = 0;
-        nuevo_evento = EV_EMP_ALFA;
-        return;
-      }
-	  }
-	}
-
-	if(modo == MODO_MORSE && message != "")
-	{
-		barraNeoPX.clear();
-		(message.substring(0, TAM_BUFFER_MORSE - 1)).toCharArray(morse_buffer, 6);
-		message=message.substring(TAM_BUFFER_MORSE - 1, message.length() + 1);
-		nuevo_evento = EV_MOSTRAR;
-		estado_actual = EST_TRADUCIENDO_MORSE;
-    return;
+	  nuevo_evento = EV_TECLADO;
+	  interrupcion = true;
 	}
 
   if (interrupcion == true)
@@ -737,25 +767,9 @@ void isr()
 
 void isr_modo()
 {
-  message = "";
-  morse_buffer[0] = '\0';
+  interrupcion = true;
+  nuevo_evento = EV_MODO;
   serial_flush();
-  if (modo == MODO_ALFA)
-  {
-    strcpy(lcd_buffer_superior, "Trad. Morse:");
-    strcpy(lcd_buffer_inferior, "\0");
-    actualizar_lcd();
-    modo = MODO_MORSE;
-  }
-  else
-  {
-    strcpy(lcd_buffer_superior, "Trad. Alfanum:");
-    strcpy(lcd_buffer_inferior, "\0");
-    actualizar_lcd();
-    modo = MODO_ALFA;
-	}
-  // Agregar evento para limpiar.
-  estado_actual = EST_INACTIVO;
 }
 
 //----------------------------------------------------------
