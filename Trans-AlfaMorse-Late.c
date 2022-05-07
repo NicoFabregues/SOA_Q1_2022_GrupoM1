@@ -450,10 +450,10 @@ void leer_teclado()
 		message = buffer_lectura;
 		serial_flush();
 		Serial.print("Se ingreso: ");
-		Serial.println(message);
-    interrupcion = true;
+        interrupcion = true;
 		if (modo == MODO_ALFA)
 		{
+        	Serial.println(message);
 			tamanio_entrada = strlen(&message[0]);
 			caracter_numero = 0;
 			nuevo_evento = EV_EMP_ALFA;
@@ -462,7 +462,7 @@ void leer_teclado()
 		{
 			barraNeoPX.clear();
 			(message.substring(0, TAM_BUFFER_MORSE - 1)).toCharArray(morse_buffer, 6);
-			message = message.substring(TAM_BUFFER_MORSE - 1, message.length() + 1);
+			Serial.println(morse_buffer);
 			nuevo_evento = EV_MOSTRAR;
 			estado_actual = EST_TRADUCIENDO_MORSE;
 		}
