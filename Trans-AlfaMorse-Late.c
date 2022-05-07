@@ -84,8 +84,6 @@ Grupo M1 - SOA
 // Tiempos
 #define TIEMPO_MAX_PUNTO                      400
 #define TIEMPO_MAX_RAYA                       800
-#define TIEMPO_ESPERA                        1200
-#define TIEMPO_LED                            100
 #define TIME_FOR_1CM                           29
 
 #define TAM_BUFFER_MORSE                        6
@@ -96,8 +94,9 @@ Grupo M1 - SOA
 #define NOTE_G3                               196
 #define NOTE_A3                               220
 #define NOTE_B3                               247
-#define NOTE_C4                               262
 #define NOTE_ONE_SECOND                      1000
+#define DURACION_NOTA                           8
+
 #define BUZZER_VALOR_MIN                       50
 #define TAM_MAX_POTENCIOMETRO                1023
 #define AJUSTE_FRECUENCIA                     450
@@ -122,12 +121,6 @@ int tamanio_entrada;
 int caracter_numero;
 int led_numero;
 String buffer_lectura;
-
-// Lista de notas para la melodia del buzzer.
-int melodia[] = {
-    NOTE_C4, NOTE_G3, NOTE_G3, NOTE_A3, NOTE_G3, 0, NOTE_B3, NOTE_C4};
-int duracion_de_notas[] = {
-    4, 8, 8, 4, 4, 4, 4, 4};
 
 const struct
 {
@@ -168,7 +161,7 @@ const struct
     {'7', "--..."},
     {'8', "---.."},
     {'9', "----."},
-	{'0', "-----"},
+	  {'0', "-----"},
     {' ', " "}};
 size_t diccionario_size = sizeof(diccionario) / sizeof(*diccionario);
 
@@ -257,9 +250,8 @@ enum events
   EV_TECLADO,
   EV_MODO,
   EV_ERROR,
-  EV_UNKNOWN
 } nuevo_evento;
-String eventos[] = {"EV_CONT", "EV_PULSADO", "EV_SOLTADO", "EV_EMP_ALFA", "EV_MOSTRAR", "EV_ACTUALIZAR_LCD", "EV_TECLADO", "EV_MODO", "EV_ERROR", "EV_UNKNOWN"};
+String eventos[] = {"EV_CONT", "EV_PULSADO", "EV_SOLTADO", "EV_EMP_ALFA", "EV_MOSTRAR", "EV_ACTUALIZAR_LCD", "EV_TECLADO", "EV_MODO", "EV_ERROR"};
 
 #define MAX_ESTADOS 5
 #define MAX_EVENTOS 9
@@ -267,13 +259,13 @@ String eventos[] = {"EV_CONT", "EV_PULSADO", "EV_SOLTADO", "EV_EMP_ALFA", "EV_MO
 typedef void (*transition)();
 
 transition tabla_de_estados[MAX_ESTADOS][MAX_EVENTOS] = {
-    {init_          , error             , error             , error             , error         , actualizar_brillo_lcd , error   		, cambiar_modo    , error     },  // EST_INICIO
+    {init_          , error             , error             , error             , error         , actualizar_brillo_lcd , error   		  , cambiar_modo    , error     },  // EST_INICIO
     {none           , traduccion_morse  , obtener_caracter  , traduccion_alfa   , error         , actualizar_brillo_lcd , leer_teclado  , cambiar_modo    , error     },  // EST_INACTIVO
     {none           , error             , error             , error             , mostrar_alfa  , actualizar_brillo_lcd , leer_teclado	, cambiar_modo    , error     },  // EST_TRADUCIENDO_MORSE
     {traduccion_alfa, error             , error             , error             , mostrar_morse , actualizar_brillo_lcd , leer_teclado	, cambiar_modo    , error     },  // EST_TRADUCIENDO_ALFA
-    {reset_sensors  , error             , error             , error             , error         , error                 , error			, cambiar_modo    , error     }   // EST_ERROR
+    {reset_sensors  , error             , error             , error             , error         , error                 , error			    , cambiar_modo    , error     }   // EST_ERROR
 
-    // EV_CONT      , EV_PULSADO        , EV_SOLTADO        , EV_EMP_ALFA       , EV_MOSTRAR    , EV_ACTUALIZAR_LCD     , EV_TECLADO     , EV_MODO     	, EV_ERROR
+    // EV_CONT      , EV_PULSADO        , EV_SOLTADO        , EV_EMP_ALFA       , EV_MOSTRAR    , EV_ACTUALIZAR_LCD     , EV_TECLADO    , EV_MODO        	, EV_ERROR
 };
 
 //----------------------------------------------------------
@@ -283,7 +275,7 @@ void init_()
 {
   DebugPrintEstado(estados[estado_actual], eventos[nuevo_evento]);
   // Sonido de bienvenida.
-  sonar_buzzer();
+  sonar_buzzer(NOTE_G3);
   estado_actual = EST_INACTIVO;
 }
 
@@ -302,7 +294,7 @@ void error()
   DebugPrintEstado(estados[estado_actual], eventos[nuevo_evento]);
 
   // Sueno alarma de error
-  sonar_buzzer();
+  sonar_buzzer(NOTE_A3);
 
   // Evento para cambiar de estado
   nuevo_evento = EV_CONT;
@@ -452,26 +444,25 @@ void mostrar_morse()
 
 void leer_teclado()
 {
+  // Leo por teclado según el modo de operación y guardo el texto ingresado.
 	if ((buffer_lectura = Serial.readString()) != "")
 	{
 		message = buffer_lectura;
 		serial_flush();
 		Serial.print("Se ingreso: ");
 		Serial.println(message);
+    interrupcion = true;
 		if (modo == MODO_ALFA)
 		{
 			tamanio_entrada = strlen(&message[0]);
 			caracter_numero = 0;
 			nuevo_evento = EV_EMP_ALFA;
-		    interrupcion = true;
-			return;
 		}
 		else
 		{
-			interrupcion = true;
 			barraNeoPX.clear();
 			(message.substring(0, TAM_BUFFER_MORSE - 1)).toCharArray(morse_buffer, 6);
-			message=message.substring(TAM_BUFFER_MORSE - 1, message.length() + 1);
+			message = message.substring(TAM_BUFFER_MORSE - 1, message.length() + 1);
 			nuevo_evento = EV_MOSTRAR;
 			estado_actual = EST_TRADUCIENDO_MORSE;
 		}
@@ -480,6 +471,7 @@ void leer_teclado()
 
 void cambiar_modo()
 {
+  // Cambio de modo, y escribo en el display modo actual
   message = "";
   morse_buffer[0] = '\0';
   serial_flush();
@@ -502,6 +494,7 @@ void cambiar_modo()
 
 void reset_sensors()
 {
+  // Vuelvo a estado idle y reseteo buffer.
   morse_buffer[0] = '\0';
   estado_actual = EST_INACTIVO;
 }
@@ -512,12 +505,15 @@ void reset_sensors()
 void mostrar_morse_por_led(const char morse)
 {
 	size_t j = led_numero > CANTIDAD_LEDS_NPX / 3 ? 0 : led_numero;
+
 	led_estado = !led_estado;
 	digitalWrite(PIN_ACT_LED, led_estado);
 	led_estado = !led_estado;
 	digitalWrite(PIN_ACT_LED, led_estado);
+
 	// Muestro Simbolo Morse por NeoPixel
 	mostrarSimboloMorseNeoPX(j, morse);
+
 	// Limpio memoria actual
 	led_numero++;
 }
@@ -562,7 +558,7 @@ void actualizar_brillo_lcd()
 
 void actualizar_lcd()
 {
-  // Funcion para actualizar el display.
+  // Funcion para actualizar el contenido del display.
   lcd.clear();
   lcd.setCursor(0, LINEA_0_LCD);
   lcd.print(lcd_buffer_superior);
@@ -573,11 +569,10 @@ void actualizar_lcd()
   lcd.print(lcd_buffer_inferior);
 }
 
-void sonar_buzzer()
+void sonar_buzzer(int nota)
 {
   // Sueno una nota por el buzzer
-  int duracion = NOTE_ONE_SECOND / duracion_de_notas[1];
-  tone(PIN_ACT_BUZZER, 100, duracion);
+  tone(PIN_ACT_BUZZER, nota, DURACION_NOTA);
 }
 
 //----------------------------------------------------------
@@ -604,7 +599,7 @@ bool leer_sensor_distancia()
   // un viaje de ida y vuelta al sensor.
   distcm = tiempo_vta / TIME_FOR_1CM / 2;
 
-  // Prendo el led si pasa el umbral
+  // Si se encuentra en un rango distinto, lanzo evento para actualizar brillo
   if (distcm < UMBRAL_DISTANCIA_MIN && brillo_actual != BRILLO_ALTO)
   {
     brillo_actual = BRILLO_ALTO;
@@ -675,9 +670,9 @@ void do_init()
   delta = 0;
 
   // Inicia contadores
-  tamanio_entrada=0;
-  led_numero=0;
-  caracter_numero=0;
+  tamanio_entrada = 0;
+  led_numero = 0;
+  caracter_numero = 0;
 
   // Mensaje bienvenida
   lcd.begin(DATOS_BUS_LCD, PIN_DB7_LCD);
@@ -720,7 +715,7 @@ void obtener_nuevo_evento()
 	if (Serial.available())
 	{
 	  nuevo_evento = EV_TECLADO;
-	  interrupcion = true;
+	  return;
 	}
 
   if (interrupcion == true)
@@ -746,7 +741,7 @@ void maquina_de_estados()
   }
   else
   {
-    DebugPrintEstado(estados[EST_ERROR], eventos[EV_UNKNOWN]);
+    // DebugPrintEstado(estados[EST_ERROR], eventos[EV_UNKNOWN]);
   }
 }
 
@@ -755,6 +750,7 @@ void maquina_de_estados()
 
 void isr()
 {
+  // Si estoy en modo Morse, detecto la pulsacion del botón.
   if (modo == MODO_MORSE)
   {
     interrupcion = true;
@@ -767,6 +763,7 @@ void isr()
 
 void isr_modo()
 {
+  // Lanzo el evento cambio de modo.
   interrupcion = true;
   nuevo_evento = EV_MODO;
   serial_flush();
