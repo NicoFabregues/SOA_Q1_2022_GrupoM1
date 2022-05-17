@@ -53,7 +53,6 @@ Grupo M1 - SOA
 #define BRILLO_BAJO                             0
 #define BRILLO_MEDIO                           64
 #define BRILLO_ALTO                           128
-#define MAX_BRILLO_LED                         	  255
 #define UMBRAL_DISTANCIA_MIN                   50
 #define UMBRAL_DISTANCIA_MAX                  140
 #define COLORES_RGB                             3
@@ -93,10 +92,12 @@ Grupo M1 - SOA
 #define TAM_BUFFER_LCD                         17
 
 // Defino las notas que sonaran en el buzzer
-#define NOTE_ERR                              250
-#define NOTE_INIT                             50000
-#define NOTE_OK                               10000
-#define DURACION_NOTA                         20
+#define NOTE_C4                               262
+#define NOTE_G3                               196
+#define NOTE_A3                               220
+#define NOTE_B3                               247
+#define NOTE_ONE_SECOND                      1000
+#define DURACION_NOTA                           8
 
 #define BUZZER_VALOR_MIN                       50
 #define TAM_MAX_POTENCIOMETRO                1023
@@ -104,8 +105,8 @@ Grupo M1 - SOA
 
 //----------------------------------------------------------
 // Variables Globales.
-int led_estado;
 int brillo_actual;
+int valor_pwm;
 float valor_potenciometro;
 int modo;
 long delta;
@@ -121,8 +122,6 @@ String message;
 int tamanio_entrada;
 int caracter_numero;
 int led_numero;
-int brillo_led;
-bool traduciendo;
 String buffer_lectura;
 
 const struct
@@ -255,23 +254,24 @@ enum events
   EV_ACTUALIZAR_LCD,
   EV_TECLADO,
   EV_MODO,
+  EV_LEDPWM,
   EV_ERROR,
 } nuevo_evento;
-String eventos[] = {"EV_CONT", "EV_PULSADO", "EV_SOLTADO", "EV_EMP_ALFA", "EV_MOSTRAR", "EV_ACTUALIZAR_LCD", "EV_TECLADO", "EV_MODO", "EV_ERROR"};
+String eventos[] = {"EV_CONT", "EV_PULSADO", "EV_SOLTADO", "EV_EMP_ALFA", "EV_MOSTRAR", "EV_ACTUALIZAR_LCD", "EV_TECLADO", "EV_MODO", "EV_LEDPWM", "EV_ERROR"};
 
 #define MAX_ESTADOS 5
-#define MAX_EVENTOS 9
+#define MAX_EVENTOS 10
 
 typedef void (*transition)();
 
 transition tabla_de_estados[MAX_ESTADOS][MAX_EVENTOS] = {
-    {init_          , error             , error             , error             , error         , none				    , error         , cambiar_modo     , error     },  // EST_INICIO
-    {actualizar_led , traduccion_morse  , obtener_caracter  , traduccion_alfa   , error         , actualizar_brillo_lcd , leer_teclado  , cambiar_modo     , error     },  // EST_INACTIVO
-    {none           , error             , error             , error             , mostrar_alfa  , actualizar_brillo_lcd , leer_teclado  , cambiar_modo     , error     },  // EST_TRADUCIENDO_MORSE
-    {traduccion_alfa, error             , error             , error             , mostrar_morse , none					, leer_teclado  , cambiar_modo     , error     },  // EST_TRADUCIENDO_ALFA
-    {reset_sensors  , error             , error             , error             , error         , error                 , error         , cambiar_modo     , error     }   // EST_ERROR
+    {init_          , error             , error             , error             , error         , actualizar_brillo_lcd , error         , cambiar_modo    , actualizar_led_pwm     , error     },  // EST_INICIO
+    {reset_sensors  , traduccion_morse  , obtener_caracter  , traduccion_alfa   , error         , actualizar_brillo_lcd , leer_teclado  , cambiar_modo    , actualizar_led_pwm     , error     },  // EST_INACTIVO
+    {none           , error             , error             , error             , mostrar_alfa  , actualizar_brillo_lcd , leer_teclado  , cambiar_modo    , actualizar_led_pwm     , error     },  // EST_TRADUCIENDO_MORSE
+    {traduccion_alfa, error             , error             , error             , mostrar_morse , actualizar_brillo_lcd , leer_teclado  , cambiar_modo    , actualizar_led_pwm     , error     },  // EST_TRADUCIENDO_ALFA
+    {reset_sensors  , error             , error             , error             , error         , error                 , error         , cambiar_modo    , error     , error     }   // EST_ERROR
 
-    // EV_CONT      , EV_PULSADO        , EV_SOLTADO        , EV_EMP_ALFA       , EV_MOSTRAR    , EV_ACTUALIZAR_LCD     , EV_TECLADO    , EV_MODO  		   , EV_ERROR
+    // EV_CONT      , EV_PULSADO        , EV_SOLTADO        , EV_EMP_ALFA       , EV_MOSTRAR    , EV_ACTUALIZAR_LCD     , EV_TECLADO    , EV_MODO         , EV_LEDPWM  , EV_ERROR
 };
 
 //----------------------------------------------------------
@@ -281,14 +281,13 @@ void init_()
 {
   DebugPrintEstado(estados[estado_actual], eventos[nuevo_evento]);
   // Sonido de bienvenida.
-  sonar_buzzer(NOTE_INIT);
+  sonar_buzzer(NOTE_G3);
   estado_actual = EST_INACTIVO;
 }
 
 void error()
 {
   estado_actual = EST_ERROR;
-  DebugPrintEstado(estados[estado_actual], eventos[nuevo_evento]);
 
   // Mensaje de error en display.
   lcd.clear();
@@ -296,12 +295,12 @@ void error()
   lcd.print(mensaje_error);
   lcd.setCursor(0, LINEA_1_LCD);
   lcd.print("\0");
-  
-  // Reseteo tira led
-  led_numero = 0;
+  actualizar_lcd();
+
+  DebugPrintEstado(estados[estado_actual], eventos[nuevo_evento]);
 
   // Sueno alarma de error
-  sonar_buzzer(NOTE_ERR);
+  sonar_buzzer(NOTE_A3);
 
   // Evento para cambiar de estado
   nuevo_evento = EV_CONT;
@@ -314,7 +313,6 @@ void none()
 
 void traduccion_morse()
 {
-  //Capture el tiempo en el que se presiono el pulsador
   tiempo_previo = millis();
 }
 
@@ -351,10 +349,10 @@ void obtener_caracter()
     Serial.print("Buffer parcial: ");
     Serial.println(morse_buffer);
   }
-  interrupcion = false;
   if (delta > TIEMPO_MAX_RAYA)
   {
     barraNeoPX.clear();
+    led_numero = 0;
     Serial.println("#Obteniendo Caracter#");
     // Si llego al fin de caracter, cambio el evento para traducir.
     nuevo_evento = EV_MOSTRAR;
@@ -380,30 +378,24 @@ void mostrar_alfa()
     }
     strcpy(lcd_buffer_superior, "Trad. Morse:");
     actualizar_lcd();
-	sonar_buzzer(NOTE_OK);
-	brillo_led = MAX_BRILLO_LED;
-	analogWrite(PIN_ACT_LED, brillo_led);
   }
   else
   {
     // Si NO encontre traduccion muestro error por display
+    strcpy(lcd_buffer_superior, "NOT FOUND MORSE!");
+    actualizar_lcd();
     morse_buffer[0] = '\0';
-    strcpy(mensaje_error, "NOT FOUND MORSE!");
-    nuevo_evento = EV_ERROR;
-    interrupcion = true;
-    return;
   }
-
+  //indicar fin de traduccion
+  encender_led_testigo();
   // Reseteo buffer
   morse_buffer[0] = '\0';
-  led_numero = 0;
   estado_actual = EST_INACTIVO;
 }
 
 void traduccion_alfa()
 {
   estado_actual = EST_TRADUCIENDO_ALFA;
-  //Si estoy en el ultimo caracter del buffer retorno.
   if(caracter_numero == tamanio_entrada)
   {
     estado_actual = EST_INACTIVO;
@@ -429,10 +421,9 @@ void traduccion_alfa()
   else
   {
     // Si no encontre traduccion, muestro error.
-    strcpy(mensaje_error, "NOT FOUND ALFA!!");
-    nuevo_evento = EV_ERROR;
-    interrupcion = true;
-    return;
+    strcpy(lcd_buffer_superior, "NOT FOUND ALFA!!");
+    actualizar_lcd();
+    estado_actual = EST_INACTIVO;
   }
   caracter_numero++;
 }
@@ -440,8 +431,9 @@ void traduccion_alfa()
 void mostrar_morse()
 {
 
-  // Si encontré traduccion, muestro por lcd.
+  // Si encontré traduccion, muestro por led y lcd.
   Serial.println(morse_buffer);
+  //mostrar_morse_por_ledNeoPX(morse_buffer);
   if (strlen(lcd_buffer_inferior) + strlen(morse_buffer) + 1 <= DATOS_BUS_LCD)
   {
     strncat(lcd_buffer_inferior, morse_buffer, strlen(morse_buffer));
@@ -454,10 +446,9 @@ void mostrar_morse()
     strcat(lcd_buffer_inferior, "|");
   }
   strcpy(lcd_buffer_superior, "Trad. Alfanum:");
+  //actualizar display e indicar fin de traduccion
   actualizar_lcd();
-  sonar_buzzer(NOTE_OK);
-  brillo_led = MAX_BRILLO_LED;
-  analogWrite(PIN_ACT_LED, brillo_led);
+  encender_led_testigo();
 }
 
 void leer_teclado()
@@ -468,10 +459,11 @@ void leer_teclado()
     message = buffer_lectura;
     serial_flush();
     Serial.print("Se ingreso: ");
-      interrupcion = true;
+    interrupcion = true;
+    //validar entrada segun modo
     if (modo == MODO_ALFA)
     {
-            Serial.println(message);
+      Serial.println(message);
       tamanio_entrada = strlen(&message[0]);
       caracter_numero = 0;
       nuevo_evento = EV_EMP_ALFA;
@@ -492,9 +484,9 @@ void cambiar_modo()
   // Cambio de modo, y escribo en el display modo actual
   message = "";
   morse_buffer[0] = '\0';
-  led_numero = 0;
   serial_flush();
   estado_actual = EST_INACTIVO;
+  // preparar mensaje para buffer segun modo de traduccion
   if (modo == MODO_ALFA)
   {
     strcpy(lcd_buffer_superior, "Trad. Morse:");
@@ -515,21 +507,25 @@ void reset_sensors()
 {
   // Vuelvo a estado idle y reseteo buffer.
   morse_buffer[0] = '\0';
+  analogWrite(PIN_ACT_LED, LOW);
   estado_actual = EST_INACTIVO;
 }
 
 //----------------------------------------------------------
 // Funciones actuadores
 
-void actualizar_led()
-{ 
-  valor_potenciometro = analogRead(PIN_SENSOR_POTENCIOMETRO);
-  brillo_led = brillo_led-valor_potenciometro/DIV_PWM;
-  if(brillo_led < 0)
-	  brillo_led = 0;
-  analogWrite(PIN_ACT_LED, brillo_led);
+void actualizar_led_pwm()
+{
+  // actualiza el valor de encendido de testigo led pwm. 
+  valor_pwm = valor_potenciometro/DIV_PWM;
+  analogWrite(PIN_ACT_LED, LOW);
 }
 
+void encender_led_testigo()
+{
+  // encendido de testigo led pwm - fin de traduccion. 
+  analogWrite(PIN_ACT_LED, valor_pwm);
+}
 
 void mostrar_morse_por_ledNeoPX(const char morse)
 {
@@ -571,6 +567,13 @@ void actualizar_brillo_lcd()
 {
   // Cambio el nivel de brillo de la pantalla
   analogWrite(PIN_ACT_BRILLOLCD, brillo_actual);
+
+  if (estado_actual == EST_TRADUCIENDO_ALFA)
+  {
+    // Esto es para que si cambio el brillo mientras se traduce alfa,
+    // no se pierda el evento de mostrar alfa.
+    nuevo_evento = EV_MOSTRAR;
+  }
 }
 
 void actualizar_lcd()
@@ -598,6 +601,7 @@ void sonar_buzzer(int nota)
 bool leer_sensor_distancia()
 {
   long tiempo_vta, distcm;
+
   // Emito onda ultrasonido
   pinMode(PIN_SENSOR_DISTANCIA, OUTPUT);
   digitalWrite(PIN_SENSOR_DISTANCIA, LOW);
@@ -703,9 +707,6 @@ void do_init()
   interrupcion = false;
   morse_buffer[0] = '\0';
 
-  // Inicializa estado de LED.
-  led_estado = LOW;
-
   brillo_actual = BRILLO_ALTO;
 
   // Interrupciones
@@ -720,19 +721,26 @@ void obtener_nuevo_evento()
   {
     interrupcion = true;
     nuevo_evento = EV_SOLTADO;
-	return;
   }
+
+  if (leer_sensor_potenciometro())
+  {
+    nuevo_evento = EV_LEDPWM;
+    return;
+  }
+
+  if (leer_sensor_distancia())
+  {
+    return;
+  }
+
   // Leo serial para traducir.
   if (Serial.available())
   {
     nuevo_evento = EV_TECLADO;
     return;
   }
-  if (estado_actual==1)
-  {
-	if (leer_sensor_distancia())
-		return;
-  }
+
   if (interrupcion == true)
   {
     interrupcion = false;
@@ -747,7 +755,6 @@ void maquina_de_estados()
 
   if ((nuevo_evento >= 0) && (nuevo_evento < MAX_EVENTOS) && (estado_actual >= 0) && (estado_actual < MAX_ESTADOS))
   {
-
     if (nuevo_evento != EV_CONT)
     {
       DebugPrintEstado(estados[estado_actual], eventos[nuevo_evento]);
@@ -756,7 +763,7 @@ void maquina_de_estados()
   }
   else
   {
-    // DebugPrintEstado(estados[EST_ERROR], eventos[EV_UNKNOWN]);
+      DebugPrintEstado(estados[EST_ERROR], eventos[EV_ERROR]);
   }
 }
 
