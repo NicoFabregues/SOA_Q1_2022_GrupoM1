@@ -404,7 +404,7 @@ void traduccion_alfa()
   // Traduccion de alfanumerico a morse.
   // Busco traduccion.
   strcpy(morse_buffer, encode(tolower(message[caracter_numero])));
-  if (strcmp(morse_buffer,""))
+  if (strcmp(morse_buffer, ""))
   {
     nuevo_evento = EV_MOSTRAR;
     interrupcion = true;
@@ -423,7 +423,7 @@ void mostrar_morse()
 {
   estado_actual = EST_INACTIVO;
   // Si encontré traduccion, muestro por led y lcd.
-  Serial.println("La traduccion es: ");Serial.println(morse_buffer);
+  Serial.println("La traduccion es: "); Serial.println(morse_buffer);
   //mostrar_morse_por_ledNeoPX(morse_buffer);
   if (strlen(lcd_buffer_inferior) + strlen(morse_buffer) + 1 <= DATOS_BUS_LCD)
   {
@@ -437,6 +437,7 @@ void mostrar_morse()
     strcat(lcd_buffer_inferior, "|");
   }
   strcpy(lcd_buffer_superior, "Trad. Alfanum:");
+
   // Actualizar display e indicar fin de traduccion
   actualizar_lcd();
   encender_led_testigo();
@@ -449,7 +450,7 @@ void leer_teclado()
   if (modo == MODO_ALFA)
   {
 	// Si es modo alfa leo un caracter por teclado
-	if ((buffer_lectura = Serial.read())>0)
+	if ((buffer_lectura = Serial.read()) > 0)
 	{
 		message.concat(buffer_lectura);
 		Serial.println(message);
@@ -460,14 +461,14 @@ void leer_teclado()
   // Si es modo morse leo un caracter morse completo como maximo(5)
   else if ((message = Serial.readString()) != "")
   {
-	(message.substring(0, TAM_BUFFER_MORSE - 1)).toCharArray(morse_buffer, TAM_BUFFER_MORSE  );
+    (message.substring(0, TAM_BUFFER_MORSE - 1)).toCharArray(morse_buffer, TAM_BUFFER_MORSE);
     Serial.print("Se ingreso: ");
     interrupcion = true;
-	barraNeoPX.clear();
+    barraNeoPX.clear();
     led_numero = 0;
-	serial_flush();
-	Serial.println(morse_buffer);
-	nuevo_evento = EV_MOSTRAR;
+    serial_flush();
+    Serial.println(morse_buffer);
+    nuevo_evento = EV_MOSTRAR;
   }
 }
 
@@ -479,6 +480,7 @@ void cambiar_modo()
   serial_flush();
   estado_actual = EST_INACTIVO;
   interrupcion =false;
+
   // Preparar mensaje para buffer segun modo de traduccion
   if (modo == MODO_ALFA)
   {
@@ -499,10 +501,14 @@ void cambiar_modo()
 void reset_sensors()
 {
   // Vuelvo a estado idle y voy apagando el led.
-  if(brillo_led>0)
-	brillo_led = brillo_led-valor_pwm;
+  if (brillo_led > 0)
+  {
+	  brillo_led = brillo_led-valor_pwm;
+  }
   else
+  {
 	  brillo_led = 0;
+  }
   analogWrite(PIN_ACT_LED, brillo_led);
   estado_actual = EST_INACTIVO;
 }
@@ -513,7 +519,7 @@ void reset_sensors()
 void actualizar_led_pwm()
 {
   // Actualiza el valor de encendido de testigo led pwm.
-  valor_pwm = valor_potenciometro/DIV_PWM;
+  valor_pwm = valor_potenciometro / DIV_PWM;
   analogWrite(PIN_ACT_LED, valor_pwm);
 }
 
@@ -521,7 +527,7 @@ void encender_led_testigo()
 {
   // Encendido de testigo led pwm - fin de traduccion.
   brillo_led = HIGH;
-  analogWrite(PIN_ACT_LED, HIGH);
+  analogWrite(PIN_ACT_LED, brillo_led);
 }
 
 void mostrar_morse_por_ledNeoPX(const char morse)
