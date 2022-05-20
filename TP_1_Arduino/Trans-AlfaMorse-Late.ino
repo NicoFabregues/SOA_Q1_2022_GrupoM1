@@ -1,5 +1,5 @@
 /*
-Trans-AlfaMorse-Late v1.1
+Trans-AlfaMorse-Late v1.2
 Grupo M1 - SOA
 */
 
@@ -169,7 +169,7 @@ size_t diccionario_size = sizeof(diccionario) / sizeof(*diccionario);
 //----------------------------------------------------------
 // Funciones auxiliares
 
-//funcion para encontrar el caracter morse a partir de simbolos morse
+// Funcion para encontrar el caracter morse a partir de simbolos morse
 char *encode(const char key)
 {
   for (size_t i = 0; i < diccionario_size; i++)
@@ -182,7 +182,7 @@ char *encode(const char key)
   return "";
 }
 
-//funcion para decodificar una entrada de caracter morse a caracter alfabetico
+// Funcion para decodificar una entrada de caracter morse a caracter alfabetico
 char decode(const char *key)
 {
   for (size_t i = 0; i < diccionario_size; i++)
@@ -195,7 +195,7 @@ char decode(const char *key)
   return '\0';
 }
 
-//Limpieza de serial para evitar falsas lecturas
+// Limpieza de serial para evitar falsas lecturas
 void serial_flush()
 {
   if(Serial.read()>0)
@@ -268,9 +268,9 @@ typedef void (*transition)();
 transition tabla_de_estados[MAX_ESTADOS][MAX_EVENTOS] = {
     {init_          		, error             , error             , error             , error         , actualizar_brillo_lcd , error         , cambiar_modo    , actualizar_led_pwm      , error     },  // EST_INICIO
     {reset_sensors			, traduccion_morse  , obtener_caracter  , traduccion_alfa   , mostrar_alfa  , actualizar_brillo_lcd , leer_teclado  , cambiar_modo    , actualizar_led_pwm      , error     },  // EST_INACTIVO
-    {reset_sensors          , traduccion_morse  , error             , error             , mostrar_alfa  , actualizar_brillo_lcd , leer_teclado  , cambiar_modo    , actualizar_led_pwm      , error     },  // EST_TRADUCIENDO_MORSE
+    {reset_sensors      , traduccion_morse  , error             , error             , mostrar_alfa  , actualizar_brillo_lcd , leer_teclado  , cambiar_modo    , actualizar_led_pwm      , error     },  // EST_TRADUCIENDO_MORSE
     {reset_sensors			, error             , error             , error             , mostrar_morse , actualizar_brillo_lcd , leer_teclado  , cambiar_modo    , actualizar_led_pwm      , error     },  // EST_TRADUCIENDO_ALFA
-    {reset_sensors  		, error             , error             , error             , error         , error                 , error         , cambiar_modo    , error 					, error     }   // EST_ERROR
+    {reset_sensors  		, error             , error             , error             , error         , error                 , error         , cambiar_modo    , error 					        , error     }   // EST_ERROR
 
     // EV_CONT      	, EV_PULSADO        , EV_SOLTADO        , EV_EMP_ALFA       , EV_MOSTRAR    , EV_ACTUALIZAR_LCD     , EV_TECLADO    	, EV_MODO         , EV_LEDPWM  				, EV_ERROR
 };
@@ -315,7 +315,7 @@ void none()
 void traduccion_morse()
 {
   tiempo_previo = millis();
-  //Actualizo LCD
+  // Actualizo LCD
   actualizar_lcd();
 }
 
@@ -366,7 +366,7 @@ void obtener_caracter()
 
 void mostrar_alfa()
 {
-	
+
   estado_actual = EST_INACTIVO;
   // Busco traduccion
   char cad = decode(morse_buffer);
@@ -392,7 +392,7 @@ void mostrar_alfa()
     interrupcion = true;
     return;
   }
-  //indicar fin de traduccion
+  // Indicar fin de traduccion
   encender_led_testigo();
   // Reseteo buffer
   morse_buffer[0] = '\0';
@@ -437,14 +437,14 @@ void mostrar_morse()
     strcat(lcd_buffer_inferior, "|");
   }
   strcpy(lcd_buffer_superior, "Trad. Alfanum:");
-  //actualizar display e indicar fin de traduccion
+  // Actualizar display e indicar fin de traduccion
   actualizar_lcd();
   encender_led_testigo();
 }
 
 void leer_teclado()
 {
-  //validar entrada segun modo
+  // Validar entrada segun modo
   message = "";
   if (modo == MODO_ALFA)
   {
@@ -479,7 +479,7 @@ void cambiar_modo()
   serial_flush();
   estado_actual = EST_INACTIVO;
   interrupcion =false;
-  // preparar mensaje para buffer segun modo de traduccion
+  // Preparar mensaje para buffer segun modo de traduccion
   if (modo == MODO_ALFA)
   {
     strcpy(lcd_buffer_superior, "Trad. Morse:");
@@ -494,7 +494,6 @@ void cambiar_modo()
     actualizar_lcd();
     modo = MODO_ALFA;
   }
-  
 }
 
 void reset_sensors()
@@ -513,14 +512,14 @@ void reset_sensors()
 
 void actualizar_led_pwm()
 {
-  // actualiza el valor de encendido de testigo led pwm. 
+  // Actualiza el valor de encendido de testigo led pwm.
   valor_pwm = valor_potenciometro/DIV_PWM;
   analogWrite(PIN_ACT_LED, valor_pwm);
 }
 
 void encender_led_testigo()
 {
-  // encendido de testigo led pwm - fin de traduccion.
+  // Encendido de testigo led pwm - fin de traduccion.
   brillo_led = HIGH;
   analogWrite(PIN_ACT_LED, HIGH);
 }
@@ -720,7 +719,7 @@ void obtener_nuevo_evento()
     interrupcion = true;
     nuevo_evento = EV_SOLTADO;
   }
-  
+
   if (interrupcion == true)
   {
     interrupcion = false;
@@ -738,18 +737,18 @@ void obtener_nuevo_evento()
     nuevo_evento = EV_TECLADO;
     return;
   }
-  
+
   if (leer_sensor_distancia())
   {
     return;
   }
-  
+
   if (interrupcion == true)
   {
     interrupcion = false;
     return;
   }
-  
+
   nuevo_evento = EV_CONT;
 }
 
