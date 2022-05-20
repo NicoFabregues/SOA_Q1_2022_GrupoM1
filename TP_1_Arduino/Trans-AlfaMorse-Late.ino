@@ -17,10 +17,8 @@ Grupo M1 - SOA
 #define DebugPrint(str)
 #endif
 
-#define DebugPrintEstado(estado, evento)                           \
-  {                                                                \
-    String est = estado;                                           \
-    String evt = evento;                                           \
+#define DebugPrintEstado(est, evt)                           \
+  {                                                               \
     String str;                                                    \
     str = "-----------------------------------------------------"; \
     DebugPrint(str);                                               \
@@ -122,7 +120,8 @@ String message;
 int tamanio_entrada;
 int caracter_numero;
 int led_numero;
-String buffer_lectura;
+char buffer_lectura;
+float brillo_led;
 
 const struct
 {
@@ -199,10 +198,12 @@ char decode(const char *key)
 //Limpieza de serial para evitar falsas lecturas
 void serial_flush()
 {
-  char t;
-  while (Serial.available() > 0)
+  if(Serial.read()>0)
   {
-    t = Serial.read();
+	    Serial.flush();
+	    Serial.end();
+		Serial.begin(SERIAL_SPEED);
+		Serial.flush();
   }
 }
 
@@ -234,6 +235,9 @@ stSensor sensores[MAX_CANT_SENSORES];
 //----------------------------------------------------------
 // Maquina de estados
 
+#define MAX_ESTADOS 5
+#define MAX_EVENTOS 10
+
 enum states
 {
   EST_INICIO,
@@ -242,7 +246,7 @@ enum states
   EST_TRADUCIENDO_ALFA,
   EST_ERROR
 } estado_actual;
-String estados[] = {"EST_INICIO", "EST_INACTIVO", "EST_TRADUCIENDO_MORSE", "EST_TRADUCIENDO_ALFA", "EST_ERROR"};
+String estados[MAX_ESTADOS] = {"EST_INICIO", "EST_INACTIVO", "EST_TRADUCIENDO_MORSE", "EST_TRADUCIENDO_ALFA", "EST_ERROR"};
 
 enum events
 {
@@ -257,21 +261,18 @@ enum events
   EV_LEDPWM,
   EV_ERROR,
 } nuevo_evento;
-String eventos[] = {"EV_CONT", "EV_PULSADO", "EV_SOLTADO", "EV_EMP_ALFA", "EV_MOSTRAR", "EV_ACTUALIZAR_LCD", "EV_TECLADO", "EV_MODO", "EV_LEDPWM", "EV_ERROR"};
-
-#define MAX_ESTADOS 5
-#define MAX_EVENTOS 10
+String eventos[MAX_EVENTOS] = {"EV_CONT", "EV_PULSADO", "EV_SOLTADO", "EV_EMP_ALFA", "EV_MOSTRAR", "EV_ACTUALIZAR_LCD", "EV_TECLADO", "EV_MODO", "EV_LEDPWM", "EV_ERROR"};
 
 typedef void (*transition)();
 
 transition tabla_de_estados[MAX_ESTADOS][MAX_EVENTOS] = {
-    {init_          , error             , error             , error             , error         , actualizar_brillo_lcd , error         , cambiar_modo    , actualizar_led_pwm     , error     },  // EST_INICIO
-    {reset_sensors  , traduccion_morse  , obtener_caracter  , traduccion_alfa   , error         , actualizar_brillo_lcd , leer_teclado  , cambiar_modo    , actualizar_led_pwm     , error     },  // EST_INACTIVO
-    {none           , error             , error             , error             , mostrar_alfa  , actualizar_brillo_lcd , leer_teclado  , cambiar_modo    , actualizar_led_pwm     , error     },  // EST_TRADUCIENDO_MORSE
-    {traduccion_alfa, error             , error             , error             , mostrar_morse , actualizar_brillo_lcd , leer_teclado  , cambiar_modo    , actualizar_led_pwm     , error     },  // EST_TRADUCIENDO_ALFA
-    {reset_sensors  , error             , error             , error             , error         , error                 , error         , cambiar_modo    , error     , error     }   // EST_ERROR
+    {init_          		, error             , error             , error             , error         , actualizar_brillo_lcd , error         , cambiar_modo    , actualizar_led_pwm      , error     },  // EST_INICIO
+    {reset_sensors			, traduccion_morse  , obtener_caracter  , traduccion_alfa   , mostrar_alfa  , actualizar_brillo_lcd , leer_teclado  , cambiar_modo    , actualizar_led_pwm      , error     },  // EST_INACTIVO
+    {reset_sensors          , traduccion_morse  , error             , error             , mostrar_alfa  , actualizar_brillo_lcd , leer_teclado  , cambiar_modo    , actualizar_led_pwm      , error     },  // EST_TRADUCIENDO_MORSE
+    {reset_sensors			, error             , error             , error             , mostrar_morse , actualizar_brillo_lcd , leer_teclado  , cambiar_modo    , actualizar_led_pwm      , error     },  // EST_TRADUCIENDO_ALFA
+    {reset_sensors  		, error             , error             , error             , error         , error                 , error         , cambiar_modo    , error 					, error     }   // EST_ERROR
 
-    // EV_CONT      , EV_PULSADO        , EV_SOLTADO        , EV_EMP_ALFA       , EV_MOSTRAR    , EV_ACTUALIZAR_LCD     , EV_TECLADO    , EV_MODO         , EV_LEDPWM  , EV_ERROR
+    // EV_CONT      	, EV_PULSADO        , EV_SOLTADO        , EV_EMP_ALFA       , EV_MOSTRAR    , EV_ACTUALIZAR_LCD     , EV_TECLADO    	, EV_MODO         , EV_LEDPWM  				, EV_ERROR
 };
 
 //----------------------------------------------------------
@@ -294,16 +295,16 @@ void error()
   lcd.setCursor(0, LINEA_0_LCD);
   lcd.print(mensaje_error);
   lcd.setCursor(0, LINEA_1_LCD);
-  lcd.print("\0");
-  actualizar_lcd();
 
-  DebugPrintEstado(estados[estado_actual], eventos[nuevo_evento]);
 
-  // Sueno alarma de error
+  // Sueno alarma de error y reseteo buffers
   sonar_buzzer(NOTE_A3);
+  morse_buffer[0] = '\0';
+  serial_flush();
 
   // Evento para cambiar de estado
   nuevo_evento = EV_CONT;
+  DebugPrintEstado(estados[estado_actual], eventos[nuevo_evento]);
   interrupcion = true;
 }
 
@@ -314,10 +315,13 @@ void none()
 void traduccion_morse()
 {
   tiempo_previo = millis();
+  //Actualizo LCD
+  actualizar_lcd();
 }
 
 void obtener_caracter()
 {
+  estado_actual = EST_TRADUCIENDO_MORSE;
   // Calculo el tiempo que estuvo pulsado el boton.
   delta = millis() - tiempo_previo;
   tiempo_previo = 0;
@@ -357,12 +361,13 @@ void obtener_caracter()
     // Si llego al fin de caracter, cambio el evento para traducir.
     nuevo_evento = EV_MOSTRAR;
     interrupcion = true;
-    estado_actual = EST_TRADUCIENDO_MORSE;
   }
 }
 
 void mostrar_alfa()
 {
+	
+  estado_actual = EST_INACTIVO;
   // Busco traduccion
   char cad = decode(morse_buffer);
 
@@ -382,34 +387,20 @@ void mostrar_alfa()
   else
   {
     // Si NO encontre traduccion muestro error por display
-    strcpy(lcd_buffer_superior, "NOT FOUND MORSE!");
-    actualizar_lcd();
-    morse_buffer[0] = '\0';
+    strcpy(mensaje_error, "NOT FOUND MORSE!");
+    nuevo_evento = EV_ERROR;
+    interrupcion = true;
+    return;
   }
   //indicar fin de traduccion
   encender_led_testigo();
   // Reseteo buffer
   morse_buffer[0] = '\0';
-  estado_actual = EST_INACTIVO;
 }
 
 void traduccion_alfa()
 {
   estado_actual = EST_TRADUCIENDO_ALFA;
-  if(caracter_numero == tamanio_entrada)
-  {
-    estado_actual = EST_INACTIVO;
-    return;
-  }
-  if (modo == MODO_MORSE)
-  {
-    // Si estoy en Modo morse, dejo de traducir alfa.
-    strcpy(lcd_buffer_superior, "Trad. Morse:");
-    strcpy(lcd_buffer_inferior, "\0");
-    actualizar_lcd();
-    estado_actual = EST_INACTIVO;
-    return;
-  }
   // Traduccion de alfanumerico a morse.
   // Busco traduccion.
   strcpy(morse_buffer, encode(tolower(message[caracter_numero])));
@@ -421,18 +412,18 @@ void traduccion_alfa()
   else
   {
     // Si no encontre traduccion, muestro error.
-    strcpy(lcd_buffer_superior, "NOT FOUND ALFA!!");
-    actualizar_lcd();
-    estado_actual = EST_INACTIVO;
+    strcpy(mensaje_error, "NOT FOUND ALFA!!");
+    nuevo_evento = EV_ERROR;
+    interrupcion = true;
+    return;
   }
-  caracter_numero++;
 }
 
 void mostrar_morse()
 {
-
+  estado_actual = EST_INACTIVO;
   // Si encontré traduccion, muestro por led y lcd.
-  Serial.println(morse_buffer);
+  Serial.println("La traduccion es: ");Serial.println(morse_buffer);
   //mostrar_morse_por_ledNeoPX(morse_buffer);
   if (strlen(lcd_buffer_inferior) + strlen(morse_buffer) + 1 <= DATOS_BUS_LCD)
   {
@@ -453,29 +444,30 @@ void mostrar_morse()
 
 void leer_teclado()
 {
-  // Leo por teclado según el modo de operación y guardo el texto ingresado.
-  if ((buffer_lectura = Serial.readString()) != "")
+  //validar entrada segun modo
+  message = "";
+  if (modo == MODO_ALFA)
   {
-    message = buffer_lectura;
-    serial_flush();
+	// Si es modo alfa leo un caracter por teclado
+	if ((buffer_lectura = Serial.read())>0)
+	{
+		message.concat(buffer_lectura);
+		Serial.println(message);
+		interrupcion = true;
+		nuevo_evento = EV_EMP_ALFA;
+	}
+  }
+  // Si es modo morse leo un caracter morse completo como maximo(5)
+  else if ((message = Serial.readString()) != "")
+  {
+	(message.substring(0, TAM_BUFFER_MORSE - 1)).toCharArray(morse_buffer, TAM_BUFFER_MORSE  );
     Serial.print("Se ingreso: ");
     interrupcion = true;
-    //validar entrada segun modo
-    if (modo == MODO_ALFA)
-    {
-      Serial.println(message);
-      tamanio_entrada = strlen(&message[0]);
-      caracter_numero = 0;
-      nuevo_evento = EV_EMP_ALFA;
-    }
-    else
-    {
-      barraNeoPX.clear();
-      (message.substring(0, TAM_BUFFER_MORSE - 1)).toCharArray(morse_buffer, 6);
-      Serial.println(morse_buffer);
-      nuevo_evento = EV_MOSTRAR;
-      estado_actual = EST_TRADUCIENDO_MORSE;
-    }
+	barraNeoPX.clear();
+    led_numero = 0;
+	serial_flush();
+	Serial.println(morse_buffer);
+	nuevo_evento = EV_MOSTRAR;
   }
 }
 
@@ -486,6 +478,7 @@ void cambiar_modo()
   morse_buffer[0] = '\0';
   serial_flush();
   estado_actual = EST_INACTIVO;
+  interrupcion =false;
   // preparar mensaje para buffer segun modo de traduccion
   if (modo == MODO_ALFA)
   {
@@ -501,13 +494,17 @@ void cambiar_modo()
     actualizar_lcd();
     modo = MODO_ALFA;
   }
+  
 }
 
 void reset_sensors()
 {
-  // Vuelvo a estado idle y reseteo buffer.
-  morse_buffer[0] = '\0';
-  analogWrite(PIN_ACT_LED, LOW);
+  // Vuelvo a estado idle y voy apagando el led.
+  if(brillo_led>0)
+	brillo_led = brillo_led-valor_pwm;
+  else
+	  brillo_led = 0;
+  analogWrite(PIN_ACT_LED, brillo_led);
   estado_actual = EST_INACTIVO;
 }
 
@@ -518,13 +515,14 @@ void actualizar_led_pwm()
 {
   // actualiza el valor de encendido de testigo led pwm. 
   valor_pwm = valor_potenciometro/DIV_PWM;
-  analogWrite(PIN_ACT_LED, LOW);
+  analogWrite(PIN_ACT_LED, valor_pwm);
 }
 
 void encender_led_testigo()
 {
-  // encendido de testigo led pwm - fin de traduccion. 
-  analogWrite(PIN_ACT_LED, valor_pwm);
+  // encendido de testigo led pwm - fin de traduccion.
+  brillo_led = HIGH;
+  analogWrite(PIN_ACT_LED, HIGH);
 }
 
 void mostrar_morse_por_ledNeoPX(const char morse)
@@ -704,7 +702,7 @@ void do_init()
   // Inicia modo en morse
   modo = MODO_MORSE;
 
-  interrupcion = false;
+  interrupcion = true;
   morse_buffer[0] = '\0';
 
   brillo_actual = BRILLO_ALTO;
@@ -722,30 +720,36 @@ void obtener_nuevo_evento()
     interrupcion = true;
     nuevo_evento = EV_SOLTADO;
   }
+  
+  if (interrupcion == true)
+  {
+    interrupcion = false;
+    return;
+  }
 
   if (leer_sensor_potenciometro())
   {
     nuevo_evento = EV_LEDPWM;
     return;
   }
-
-  if (leer_sensor_distancia())
-  {
-    return;
-  }
-
-  // Leo serial para traducir.
+  // Leo si hay un caracter disponible para leer.
   if (Serial.available())
   {
     nuevo_evento = EV_TECLADO;
     return;
   }
-
+  
+  if (leer_sensor_distancia())
+  {
+    return;
+  }
+  
   if (interrupcion == true)
   {
     interrupcion = false;
     return;
   }
+  
   nuevo_evento = EV_CONT;
 }
 
