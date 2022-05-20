@@ -122,77 +122,89 @@ int caracter_numero;
 int led_numero;
 char buffer_lectura;
 float brillo_led;
-
-const struct
-{
-  char key, *value;
-} diccionario[] = {
-    {'a', ".-"},
-    {'b', "-..."},
-    {'c', "-.."},
-    {'d', "-.."},
-    {'e', "."},
-    {'f', "..-."},
-    {'g', "--."},
-    {'h', "...."},
-    {'i', ".."},
-    {'j', ".---"},
-    {'k', "-.-"},
-    {'l', ".-.."},
-    {'m', "--"},
-    {'n', "-."},
-    {'o', "---"},
-    {'p', ".--."},
-    {'q', "--.-"},
-    {'r', ".-."},
-    {'s', "..."},
-    {'t', "-"},
-    {'u', "..-"},
-    {'v', "...-"},
-    {'w', ".--"},
-    {'x', "-..-"},
-    {'y', "-.--"},
-    {'z', "--.."},
-    {'1', ".----"},
-    {'2', "..---"},
-    {'3', "...--"},
-    {'4', "....-"},
-    {'5', "....."},
-    {'6', "-...."},
-    {'7', "--..."},
-    {'8', "---.."},
-    {'9', "----."},
-    {'0', "-----"},
-    {' ', " "}};
-size_t diccionario_size = sizeof(diccionario) / sizeof(*diccionario);
+char *trad[] = {".-","-...","-.-.","-..",".","..-.","--.",
+"....","..",".---","-.-",".-..","--","-.","---",".--.","--.-",
+".-.","...","-","..-","...-",".--","-..-","-.--","--.."};
 
 //----------------------------------------------------------
 // Funciones auxiliares
 
 // Funcion para encontrar el caracter morse a partir de simbolos morse
-char *encode(const char key)
+char *encode(const char alpha)
 {
-  for (size_t i = 0; i < diccionario_size; i++)
+  char* retorno;
+  if (isalpha(alpha))
   {
-    if (diccionario[i].key == key)
-    {
-      return diccionario[i].value;
-    }
+    retorno = trad[(int)alpha - (int)'a'];
   }
-  return "";
+  else
+  {
+    retorno = "";
+  }
+  return retorno;
 }
 
 // Funcion para decodificar una entrada de caracter morse a caracter alfabetico
 char decode(const char *key)
 {
-  for (size_t i = 0; i < diccionario_size; i++)
-  {
-    if (!strcmp(key, diccionario[i].value))
-    {
-      return diccionario[i].key;
-    }
-  }
-  return '\0';
+  char retorno;
+
+  if (strcmp(key, ".-") == 0)
+    retorno = 'a';
+  else if (strcmp(key, "-...") == 0)
+    retorno = 'b';
+  else if (strcmp(key, "-.-.") == 0)
+    retorno = 'c';
+  else if (strcmp(key, "-..") == 0)
+    retorno = 'd';
+  else if (strcmp(key, ".") == 0)
+    retorno = 'e';
+  else if (strcmp(key, "..-.") == 0)
+    retorno = 'f';
+  else if (strcmp(key, "--.") == 0)
+    retorno = 'g';
+  else if (strcmp(key, "....") == 0)
+    retorno = 'h';
+  else if (strcmp(key, "..") == 0)
+    retorno = 'i';
+  else if (strcmp(key, ".---") == 0)
+    retorno = 'j';
+  else if (strcmp(key, "-.-") == 0)
+    retorno = 'k';
+  else if (strcmp(key, ".-..") == 0)
+    retorno = 'l';
+  else if (strcmp(key, "--") == 0)
+    retorno = 'm';
+  else if (strcmp(key, "-.") == 0)
+    retorno = 'n';
+  else if (strcmp(key, "---") == 0)
+    retorno = 'o';
+  else if (strcmp(key, ".--.") == 0)
+    retorno = 'p';
+  else if (strcmp(key, "--.-") == 0)
+    retorno = 'q';
+  else if (strcmp(key, ".-.") == 0)
+    retorno = 'r';
+  else if (strcmp(key, "...") == 0)
+    retorno = 's';
+  else if (strcmp(key, "-") == 0)
+    retorno = 't';
+  else if (strcmp(key, "..-") == 0)
+    retorno = 'u';
+  else if (strcmp(key, "...-") == 0)
+    retorno = 'v';
+  else if (strcmp(key, ".--") == 0)
+    retorno = 'w';
+  else if (strcmp(key, "-..-") == 0)
+    retorno = 'x';
+  else if (strcmp(key, "-.--") == 0)
+    retorno = 'y';
+  else if (strcmp(key, "--..") == 0)
+    retorno = 'z';
+  else
+    retorno = '\0';
+
+  return retorno;
 }
 
 // Limpieza de serial para evitar falsas lecturas
@@ -200,8 +212,8 @@ void serial_flush()
 {
   if(Serial.read()>0)
   {
-	    Serial.flush();
-	    Serial.end();
+	  Serial.flush();
+	  Serial.end();
 		Serial.begin(SERIAL_SPEED);
 		Serial.flush();
   }
