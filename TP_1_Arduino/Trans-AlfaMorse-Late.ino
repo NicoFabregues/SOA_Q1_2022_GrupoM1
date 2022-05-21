@@ -212,10 +212,10 @@ void serial_flush()
 {
   if(Serial.read()>0)
   {
-	  Serial.flush();
-	  Serial.end();
-		Serial.begin(SERIAL_SPEED);
-		Serial.flush();
+    Serial.flush();
+    Serial.end();
+    Serial.begin(SERIAL_SPEED);
+    Serial.flush();
   }
 }
 
@@ -278,13 +278,13 @@ String eventos[MAX_EVENTOS] = {"EV_CONT", "EV_PULSADO", "EV_SOLTADO", "EV_EMP_AL
 typedef void (*transition)();
 
 transition tabla_de_estados[MAX_ESTADOS][MAX_EVENTOS] = {
-    {init_          		, error             , error             , error             , error         , actualizar_brillo_lcd , error         , cambiar_modo    , actualizar_led_pwm      , error     },  // EST_INICIO
-    {reset_sensors			, traduccion_morse  , obtener_caracter  , traduccion_alfa   , mostrar_alfa  , actualizar_brillo_lcd , leer_teclado  , cambiar_modo    , actualizar_led_pwm      , error     },  // EST_INACTIVO
+    {init_              , error             , error             , error             , error         , actualizar_brillo_lcd , error         , cambiar_modo    , actualizar_led_pwm      , error     },  // EST_INICIO
+    {reset_sensors      , traduccion_morse  , obtener_caracter  , traduccion_alfa   , mostrar_alfa  , actualizar_brillo_lcd , leer_teclado  , cambiar_modo    , actualizar_led_pwm      , error     },  // EST_INACTIVO
     {reset_sensors      , traduccion_morse  , error             , error             , mostrar_alfa  , actualizar_brillo_lcd , leer_teclado  , cambiar_modo    , actualizar_led_pwm      , error     },  // EST_TRADUCIENDO_MORSE
-    {reset_sensors			, error             , error             , error             , mostrar_morse , actualizar_brillo_lcd , leer_teclado  , cambiar_modo    , actualizar_led_pwm      , error     },  // EST_TRADUCIENDO_ALFA
-    {reset_sensors  		, error             , error             , error             , error         , error                 , error         , cambiar_modo    , error 					        , error     }   // EST_ERROR
+    {reset_sensors      , error             , error             , error             , mostrar_morse , actualizar_brillo_lcd , leer_teclado  , cambiar_modo    , actualizar_led_pwm      , error     },  // EST_TRADUCIENDO_ALFA
+    {reset_sensors      , error             , error             , error             , error         , error                 , error         , cambiar_modo    , error                   , error     }   // EST_ERROR
 
-    // EV_CONT      	, EV_PULSADO        , EV_SOLTADO        , EV_EMP_ALFA       , EV_MOSTRAR    , EV_ACTUALIZAR_LCD     , EV_TECLADO    	, EV_MODO         , EV_LEDPWM  				, EV_ERROR
+    // EV_CONT        , EV_PULSADO        , EV_SOLTADO        , EV_EMP_ALFA       , EV_MOSTRAR    , EV_ACTUALIZAR_LCD     , EV_TECLADO      , EV_MODO         , EV_LEDPWM         , EV_ERROR
 };
 
 //----------------------------------------------------------
@@ -413,7 +413,7 @@ void mostrar_alfa()
 void traduccion_alfa()
 {
   estado_actual = EST_TRADUCIENDO_ALFA;
-  // Traduccion de alfanumerico a morse.
+  // Traduccion de alfabetico a morse.
   // Busco traduccion.
   strcpy(morse_buffer, encode(tolower(message[caracter_numero])));
   if (strcmp(morse_buffer, ""))
@@ -448,7 +448,7 @@ void mostrar_morse()
     strncat(lcd_buffer_inferior, morse_buffer, strlen(morse_buffer));
     strcat(lcd_buffer_inferior, "|");
   }
-  strcpy(lcd_buffer_superior, "Trad. Alfanum:");
+  strcpy(lcd_buffer_superior, "Trad. Alfab:");
 
   // Actualizar display e indicar fin de traduccion
   actualizar_lcd();
@@ -461,14 +461,14 @@ void leer_teclado()
   message = "";
   if (modo == MODO_ALFA)
   {
-	// Si es modo alfa leo un caracter por teclado
-	if ((buffer_lectura = Serial.read()) > 0)
-	{
-		message.concat(buffer_lectura);
-		Serial.println(message);
-		interrupcion = true;
-		nuevo_evento = EV_EMP_ALFA;
-	}
+  // Si es modo alfa leo un caracter por teclado
+  if ((buffer_lectura = Serial.read()) > 0)
+  {
+    message.concat(buffer_lectura);
+    Serial.println(message);
+    interrupcion = true;
+    nuevo_evento = EV_EMP_ALFA;
+  }
   }
   // Si es modo morse leo un caracter morse completo como maximo(5)
   else if ((message = Serial.readString()) != "")
@@ -503,7 +503,7 @@ void cambiar_modo()
   }
   else
   {
-    strcpy(lcd_buffer_superior, "Trad. Alfanum:");
+    strcpy(lcd_buffer_superior, "Trad. Alfab:");
     strcpy(lcd_buffer_inferior, "\0");
     actualizar_lcd();
     modo = MODO_ALFA;
@@ -515,11 +515,11 @@ void reset_sensors()
   // Vuelvo a estado idle y voy apagando el led.
   if (brillo_led > 0)
   {
-	  brillo_led = brillo_led-valor_pwm;
+    brillo_led = brillo_led-valor_pwm;
   }
   else
   {
-	  brillo_led = 0;
+    brillo_led = 0;
   }
   analogWrite(PIN_ACT_LED, brillo_led);
   estado_actual = EST_INACTIVO;
@@ -635,26 +635,41 @@ bool leer_sensor_distancia()
   distcm = tiempo_vta / TIME_FOR_1CM / 2;
 
   // Si se encuentra en un rango distinto, lanzo evento para actualizar brillo
-  if (distcm < UMBRAL_DISTANCIA_MIN && brillo_actual != BRILLO_ALTO)
+  if (brillo_actual == BRILLO_ALTO)
   {
-    brillo_actual = BRILLO_ALTO;
+    if (distcm < UMBRAL_DISTANCIA_MAX && distcm > UMBRAL_DISTANCIA_MIN)
+      brillo_actual = BRILLO_MEDIO;
+    else if (distcm > UMBRAL_DISTANCIA_MAX)
+        brillo_actual = BRILLO_BAJO;
+      else
+          return false;
     nuevo_evento = EV_ACTUALIZAR_LCD;
+    return true;
   }
-  else if (distcm < UMBRAL_DISTANCIA_MAX && brillo_actual != BRILLO_MEDIO)
+
+  if (brillo_actual == BRILLO_MEDIO)
   {
-    brillo_actual = BRILLO_MEDIO;
+    if (distcm < UMBRAL_DISTANCIA_MIN)
+      brillo_actual = BRILLO_ALTO;
+    else if (distcm > UMBRAL_DISTANCIA_MAX)
+        brillo_actual = BRILLO_BAJO;
+      else
+          return false;
     nuevo_evento = EV_ACTUALIZAR_LCD;
+    return true;
   }
-  else if (distcm > UMBRAL_DISTANCIA_MAX && brillo_actual != BRILLO_BAJO)
+
+  if (brillo_actual == BRILLO_BAJO)
   {
-    brillo_actual = BRILLO_BAJO;
+    if (distcm < UMBRAL_DISTANCIA_MAX && distcm > UMBRAL_DISTANCIA_MIN)
+      brillo_actual = BRILLO_MEDIO;
+    else if (distcm < UMBRAL_DISTANCIA_MIN)
+        brillo_actual = BRILLO_ALTO;
+      else
+          return false;
     nuevo_evento = EV_ACTUALIZAR_LCD;
+    return true;
   }
-  else
-  {
-    return false; // No hubo cambios
-  }
-  return true; // Hay evento
 }
 
 bool leer_sensor_potenciometro()
