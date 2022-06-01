@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">TennisTracker</string>
+    <string name="archivo_menus">com.example.proyecto.ARCHIVO_MENUS</string>
+</resources>
