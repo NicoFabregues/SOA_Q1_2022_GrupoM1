@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".views.VerificacionUserLoginActivity">
+
+    <EditText
+        android:id="@+id/editTextGrupo"
+        android:layout_width="90dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Grupo"
+        android:inputType="number"
+        android:minHeight="48dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.747"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTextPass" />
+
+    <EditText
+        android:id="@+id/editTextComision"
+        android:layout_width="125dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Comision"
+        android:inputType="number"
+        android:minHeight="48dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.279"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTextPass" />
+
+    <EditText
+        android:id="@+id/editTextApellido"
+        android:layout_width="250dp"
+        android:layout_height="51dp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:minHeight="48dp"
+        android:hint="Apellido"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTextNombre" />
+
+    <TextView
+        android:id="@+id/textViewInfoUser"
+        android:layout_width="304dp"
+        android:layout_height="52dp"
+        android:layout_marginTop="32dp"
+        android:text="Por favor complete todos los datos y luego presione registrarme."
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/buttonSignup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Registrarme"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTextComision"
+        app:layout_constraintVertical_bias="0.025" />
+
+    <EditText
+        android:id="@+id/editTextMail"
+        android:layout_width="250dp"
+        android:layout_height="48dp"
+        android:ems="10"
+        android:inputType="textEmailAddress"
+        android:minHeight="48dp"
+        android:hint="Email"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTextDNI" />
+
+    <EditText
+        android:id="@+id/editTextPass"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPassword"
+        android:minHeight="48dp"
+        android:hint="Contraseña"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTextMail" />
+
+    <EditText
+        android:id="@+id/editTextNombre"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:minHeight="48dp"
+        android:hint="Nombre"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewInfoUser" />
+
+    <EditText
+        android:id="@+id/editTextDNI"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="number"
+        android:minHeight="48dp"
+        android:hint="DNI"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTextApellido" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

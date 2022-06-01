@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Users/aleja/AndroidStudioProjects/tp2_android/codigo/app/src/main/res/layout/activity_bateria.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/aleja/AndroidStudioProjects/tp2_android/codigo/app/src/main/res/layout/activity_envio_sms.xml" value="0.3328804347826087" />
+        <entry key="..\:/Users/aleja/AndroidStudioProjects/tp2_android/codigo/app/src/main/res/layout/activity_escanear_qr.xml" value="0.3211050724637681" />
+        <entry key="..\:/Users/aleja/AndroidStudioProjects/tp2_android/codigo/app/src/main/res/layout/activity_inicio.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/aleja/AndroidStudioProjects/tp2_android/codigo/app/src/main/res/layout/activity_main.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/aleja/AndroidStudioProjects/tp2_android/codigo/app/src/main/res/layout/activity_menus.xml" value="0.3170289855072464" />
+        <entry key="..\:/Users/aleja/AndroidStudioProjects/tp2_android/codigo/app/src/main/res/layout/activity_metricas.xml" value="0.3170289855072464" />
+        <entry key="..\:/Users/aleja/AndroidStudioProjects/tp2_android/codigo/app/src/main/res/layout/activity_principal.xml" value="0.3211050724637681" />
+        <entry key="..\:/Users/aleja/AndroidStudioProjects/tp2_android/codigo/app/src/main/res/layout/activity_refrescar_token.xml" value="0.3292572463768116" />
+        <entry key="..\:/Users/aleja/AndroidStudioProjects/tp2_android/codigo/app/src/main/res/layout/activity_verificacion_codigo.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/aleja/AndroidStudioProjects/tp2_android/codigo/app/src/main/res/layout/activity_verificacion_sms.xml" value="0.25" />
+        <entry key="..\:/Users/aleja/AndroidStudioProjects/tp2_android/codigo/app/src/main/res/layout/activity_verificacion_user_login.xml" value="0.33" />
+        <entry key="..\:/Users/aleja/AndroidStudioProjects/tp2_android/codigo/app/src/main/res/layout/activity_verificacion_user_signup.xml" value="0.5" />
+        <entry key="..\:/Users/aleja/AndroidStudioProjects/tp2_android/codigo/app/src/main/res/layout/content_inicio.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/aleja/AndroidStudioProjects/tp2_android/codigo/app/src/main/res/layout/fragment_first.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/aleja/AndroidStudioProjects/tp2_android/codigo/app/src/main/res/layout/fragment_second.xml" value="0.36666666666666664" />
+        <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.1735" />
+        <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.1735" />
+        <entry key="app/src/main/res/layout/activity_escanear_qr.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_verificacion_user_signup.xml" value="0.17299898682877407" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>
