@@ -15,7 +15,7 @@ public class Evento {
         this.description = description;
     }
 
-    public JSONObject getJSONForRergistrarEvento(){
+    public JSONObject getJSONForRegistrarEvento(){
         JSONObject req = new JSONObject();
         try {
             req.put("env", ENV);

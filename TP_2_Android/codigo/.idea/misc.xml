@@ -22,6 +22,9 @@
         <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.1735" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.1735" />
         <entry key="app/src/main/res/layout/activity_escanear_qr.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.3390625" />
+        <entry key="app/src/main/res/layout/activity_menus.xml" value="0.16296296296296298" />
+        <entry key="app/src/main/res/layout/activity_principal.xml" value="0.18206521739130435" />
         <entry key="app/src/main/res/layout/activity_verificacion_user_signup.xml" value="0.17299898682877407" />
       </map>
     </option>

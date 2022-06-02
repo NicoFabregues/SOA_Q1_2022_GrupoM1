@@ -29,7 +29,7 @@ public class MenusActivity extends AppCompatActivity {
         listaMediciones = new ArrayList<>();
         llenarLista();
 
-        lista = findViewById(R.id.listaMenus);
+        lista = findViewById(R.id.listaPartidos);
         arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, listaMediciones);
 
         lista.setAdapter(arrayAdapter);

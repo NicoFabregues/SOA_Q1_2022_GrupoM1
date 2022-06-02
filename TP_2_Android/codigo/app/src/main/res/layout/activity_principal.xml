@@ -4,23 +4,24 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/tennis_1"
     tools:context=".views.ActivityPrincipal">
 
     <Button
-        android:id="@+id/buttonScanQR"
+        android:id="@+id/buttonVerPartidos"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="244dp"
-        android:text="Escanear QR"
+        android:text="Ver partidos"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/buttonVerMenus"
+        android:id="@+id/buttonVerJugadores"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Ver menus guardados"
+        android:text="Ver jugadores"
         app:layout_constraintBottom_toTopOf="@+id/buttonVerMetricas"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -33,7 +34,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="48dp"
         android:text="Ver metricas"
-        app:layout_constraintBottom_toTopOf="@+id/buttonScanQR"
+        app:layout_constraintBottom_toTopOf="@+id/buttonVerPartidos"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

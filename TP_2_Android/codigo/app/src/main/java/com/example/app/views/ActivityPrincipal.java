@@ -21,8 +21,7 @@ public class ActivityPrincipal extends AppCompatActivity {
     private Intent intentPrevio;
     private Principal presenter;
     private IntentFilter filtro;
-    //private Button buttonScanQR;
-    private Button buttonVerMenus, buttonVerMetricas;
+    private Button buttonVerJugadores, buttonVerPartidos, buttonVerMetricas;
     private SensorManager luzManager;
     private Sensor sensorLuz;
     private float medicionLuz;
@@ -39,10 +38,8 @@ public class ActivityPrincipal extends AppCompatActivity {
         presenter = new Principal(this, refreshToken);
         configurarBroadcastReciever();
 
-        /*
-        buttonScanQR = findViewById(R.id.buttonScanQR);
-        */
-        buttonVerMenus = findViewById(R.id.buttonVerMenus);
+        buttonVerPartidos = findViewById(R.id.buttonVerPartidos);
+        buttonVerJugadores = findViewById(R.id.buttonVerJugadores);
         buttonVerMetricas = findViewById(R.id.buttonVerMetricas);
 
         luzManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -60,7 +57,7 @@ public class ActivityPrincipal extends AppCompatActivity {
         };
         luzManager.registerListener(listenerLuz, sensorLuz, SensorManager.SENSOR_DELAY_GAME);
 
-        /*buttonScanQR.setOnClickListener(new View.OnClickListener() {
+        /*buttonVerPartidos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // Si hay una luminosidad mayor o igual a 40 lumens permito escanear el QR
@@ -72,7 +69,7 @@ public class ActivityPrincipal extends AppCompatActivity {
                 }
             }
         });*/
-        buttonVerMenus.setOnClickListener(new View.OnClickListener() {
+        buttonVerJugadores.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(ActivityPrincipal.this, MenusActivity.class));

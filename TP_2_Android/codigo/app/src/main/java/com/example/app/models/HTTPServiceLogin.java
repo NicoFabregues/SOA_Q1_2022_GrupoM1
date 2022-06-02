@@ -23,7 +23,7 @@ public class HTTPServiceLogin extends HTTPService{
 
     private void startHTTPServiceRegistrarEvento() {
         Evento evento = new Evento(TYPE_EVENTS, EVENT_DESCRIPTION);
-        JSONObject req = evento.getJSONForRergistrarEvento();
+        JSONObject req = evento.getJSONForRegistrarEvento();
         this.intentServiceRegistrarEvento = new Intent(this, HTTPServiceRegistrarEvento.class);
         this.intentServiceRegistrarEvento.putExtra("token", token);
         this.intentServiceRegistrarEvento.putExtra("jsonObject", req.toString());
@@ -46,14 +46,14 @@ public class HTTPServiceLogin extends HTTPService{
                     Intent i = new Intent("com.example.intentservice.intent.action.LOGIN_RESPONSE");
                     i.putExtra("success", success);
                     i.putExtra("mensaje", "Error en envio de request");
-                    //Se envian los valores al bradcast reciever del presenter de login
+                    // Se envian los valores al broadcast receiver del presenter de login
                     sendBroadcast(i);
                 }
                 else if (!success) {
                     Intent i = new Intent("com.example.intentservice.intent.action.LOGIN_RESPONSE");
                     i.putExtra("success", success);
                     i.putExtra("mensaje", "Usuario o contraseña incorrectos");
-                    //Se envian los valores al bradcast reciever del presenter de login
+                    // Se envian los valores al broadcast receiver del presenter de login
                     sendBroadcast(i);
                 }
                 else {
@@ -66,7 +66,7 @@ public class HTTPServiceLogin extends HTTPService{
                     i.putExtra("mensaje", "Login exitoso");
                     i.putExtra("token", token);
                     i.putExtra("refresh_token", refreshToken);
-                    //Se envian los valores al bradcast reciever del presenter de login
+                    // Se envian los valores al broadcast receiver del presenter de login
                     sendBroadcast(i);
                 }
                 stopSelf();
@@ -77,7 +77,7 @@ public class HTTPServiceLogin extends HTTPService{
             Intent i = new Intent("com.example.intentservice.intent.action.LOGIN_RESPONSE");
             i.putExtra("success", success);
             i.putExtra("mensaje", "No hay  conexión a Internet");
-            //Se envian los valores al bradcast reciever del presenter de login
+            // Se envian los valores al bradcast reciever del presenter de login
             sendBroadcast(i);
         }
     }

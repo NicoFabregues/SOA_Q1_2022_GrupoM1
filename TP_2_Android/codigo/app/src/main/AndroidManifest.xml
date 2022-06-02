@@ -24,9 +24,6 @@
             android:name=".views.MenusActivity"
             android:exported="false" />
         <activity
-            android:name=".views.EscanearQRActivity"
-            android:exported="false" />
-        <activity
             android:name=".views.ActivityPrincipal"
             android:exported="true" />
         <activity

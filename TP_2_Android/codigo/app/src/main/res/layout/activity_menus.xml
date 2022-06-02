@@ -14,14 +14,14 @@
         android:gravity="center"
         android:paddingStart="30dp"
         android:paddingEnd="30dp"
-        android:text="Menus guardados"
+        android:text="Partidos"
         android:textSize="32sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ListView
-        android:id="@+id/listaMenus"
+        android:id="@+id/listaPartidos"
         android:layout_width="361dp"
         android:layout_height="529dp"
         android:layout_marginStart="1dp"
