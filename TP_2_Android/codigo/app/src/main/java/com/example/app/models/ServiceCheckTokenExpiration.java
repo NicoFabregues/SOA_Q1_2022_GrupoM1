@@ -26,7 +26,7 @@ public class ServiceCheckTokenExpiration extends IntentService {
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
         intentRefresh = new Intent(this, RefrescarTokenActivity.class);
-        refreshToken =  intent.getStringExtra("refresh_token");
+        refreshToken = intent.getStringExtra("refresh_token");
         intentRefresh.putExtra("refresh_token", refreshToken);
         intentRefresh.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 

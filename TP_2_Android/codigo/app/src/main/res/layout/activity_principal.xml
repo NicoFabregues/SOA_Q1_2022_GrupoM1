@@ -18,10 +18,10 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/buttonVerJugadores"
+        android:id="@+id/buttonVerRankings"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Ver jugadores"
+        android:text="Ver Rankings"
         app:layout_constraintBottom_toTopOf="@+id/buttonVerMetricas"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

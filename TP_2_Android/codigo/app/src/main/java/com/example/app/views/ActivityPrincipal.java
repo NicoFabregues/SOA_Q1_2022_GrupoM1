@@ -11,7 +11,6 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.example.app.R;
 import com.example.app.presenters.Principal;
@@ -21,7 +20,7 @@ public class ActivityPrincipal extends AppCompatActivity {
     private Intent intentPrevio;
     private Principal presenter;
     private IntentFilter filtro;
-    private Button buttonVerJugadores, buttonVerPartidos, buttonVerMetricas;
+    private Button buttonVerRankings, buttonVerPartidos, buttonVerMetricas;
     private SensorManager luzManager;
     private Sensor sensorLuz;
     private float medicionLuz;
@@ -39,7 +38,7 @@ public class ActivityPrincipal extends AppCompatActivity {
         configurarBroadcastReciever();
 
         buttonVerPartidos = findViewById(R.id.buttonVerPartidos);
-        buttonVerJugadores = findViewById(R.id.buttonVerJugadores);
+        buttonVerRankings = findViewById(R.id.buttonVerRankings);
         buttonVerMetricas = findViewById(R.id.buttonVerMetricas);
 
         luzManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -69,10 +68,10 @@ public class ActivityPrincipal extends AppCompatActivity {
                 }
             }
         });*/
-        buttonVerJugadores.setOnClickListener(new View.OnClickListener() {
+        buttonVerRankings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(ActivityPrincipal.this, MenusActivity.class));
+                startActivity(new Intent(ActivityPrincipal.this, TenisActivity.class));
             }
         });
         buttonVerMetricas.setOnClickListener(new View.OnClickListener() {
