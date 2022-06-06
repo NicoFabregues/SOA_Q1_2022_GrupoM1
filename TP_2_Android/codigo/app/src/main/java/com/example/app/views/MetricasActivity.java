@@ -11,6 +11,8 @@ import android.widget.ListView;
 import com.example.app.R;
 import com.example.app.models.DatabaseHandler;
 import com.example.app.models.Metrica;
+import com.example.app.presenters.Metricas;
+import com.example.app.presenters.Principal;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.Map;
 
 public class MetricasActivity extends AppCompatActivity {
 
+    private Metricas presenter;
     private DatabaseHandler db;
     private ListView lista;
     private ArrayList<String> listaMetricas;
@@ -27,6 +30,8 @@ public class MetricasActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_metricas);
+
+        presenter = new Metricas(this);
 
         db = new DatabaseHandler(this);
         listaMetricas = new ArrayList<>();

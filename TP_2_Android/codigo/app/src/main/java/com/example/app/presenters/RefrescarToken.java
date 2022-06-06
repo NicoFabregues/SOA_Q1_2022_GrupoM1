@@ -14,33 +14,23 @@ import com.example.app.views.RefrescarTokenActivity;
 
 import java.util.concurrent.Semaphore;
 
-public class RefrescarToken implements SensorEventListener {
+public class RefrescarToken {
 
-    private static final int UMBRAL_AGITACION = 1600, INTERVALO = 100, ESCALA = 10000;
-    private final Sensor acelerometro;
-    private final SensorManager accelerometerManager;
+
 
     private RefrescarTokenActivity view;
     private RequestTask model;
-    private float ultX, ultY, ultZ;
-    private long ultActualizacion;
     private final Semaphore semaforo = new Semaphore(1);
 
     public RefrescarToken(RefrescarTokenActivity view, String refreshToken) {
         this.view = view;
         this.model = new RequestTask(refreshToken, this);
-        this.accelerometerManager = (SensorManager) view.getSystemService(SENSOR_SERVICE);
-        this.acelerometro = accelerometerManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        this.accelerometerManager.registerListener(this, this.acelerometro, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     public ConnectionManager getConnectionManager() {
         return new ConnectionManager(this.view);
     }
 
-    public void unregisterListener() {
-        this.accelerometerManager.unregisterListener(this, acelerometro);
-    }
 
     public void ejecutarTask() {
         try {
@@ -65,31 +55,4 @@ public class RefrescarToken implements SensorEventListener {
             this.view.salirRefresh();
         }
     }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        float x, y, z;
-        long tiempoActual = System.currentTimeMillis();
-        if ((tiempoActual - ultActualizacion) > INTERVALO) {
-
-            long diferenciaTiempo = (tiempoActual - ultActualizacion);
-            ultActualizacion = tiempoActual;
-
-            x = event.values[0];
-            y = event.values[1];
-            z = event.values[2];
-
-            float velocidad = Math.abs(x + y + z - ultX - ultY - ultZ) / diferenciaTiempo * ESCALA;
-
-            if (velocidad > UMBRAL_AGITACION) {
-                this.view.salirRefresh();
-            }
-            ultX = x;
-            ultY = y;
-            ultZ = z;
-        }
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 }

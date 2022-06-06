@@ -80,6 +80,5 @@ public class RefrescarTokenActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        presenter.unregisterListener();
     }
 }

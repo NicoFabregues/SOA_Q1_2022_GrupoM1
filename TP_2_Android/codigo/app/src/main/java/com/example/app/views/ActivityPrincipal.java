@@ -21,10 +21,11 @@ public class ActivityPrincipal extends AppCompatActivity {
     private Principal presenter;
     private IntentFilter filtro;
     private Button buttonVerRankings, buttonVerPartidos, buttonVerMetricas;
-    private SensorManager luzManager;
-    private Sensor sensorLuz;
-    private float medicionLuz;
-    private SensorEventListener listenerLuz;
+   // private SensorManager luzManager;
+   // private Sensor sensorLuz;
+   // private float medicionLuz;
+   // private SensorEventListener listenerLuz;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +41,7 @@ public class ActivityPrincipal extends AppCompatActivity {
         buttonVerPartidos = findViewById(R.id.buttonVerPartidos);
         buttonVerRankings = findViewById(R.id.buttonVerRankings);
         buttonVerMetricas = findViewById(R.id.buttonVerMetricas);
-
+/*
         luzManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         sensorLuz = luzManager.getDefaultSensor(Sensor.TYPE_LIGHT);
 
@@ -55,19 +56,7 @@ public class ActivityPrincipal extends AppCompatActivity {
             public void onAccuracyChanged(Sensor sensor, int accuracy) {}
         };
         luzManager.registerListener(listenerLuz, sensorLuz, SensorManager.SENSOR_DELAY_GAME);
-
-        /*buttonVerPartidos.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Si hay una luminosidad mayor o igual a 40 lumens permito escanear el QR
-                if (medicionLuz >= 40) {
-                    startActivity(new Intent(ActivityPrincipal.this, EscanearQRActivity.class));
-                }
-                else {
-                    Toast.makeText(getApplicationContext(), "No hay suficiente luz para escanear el QR", Toast.LENGTH_LONG).show();
-                }
-            }
-        });*/
+*/
         buttonVerRankings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
