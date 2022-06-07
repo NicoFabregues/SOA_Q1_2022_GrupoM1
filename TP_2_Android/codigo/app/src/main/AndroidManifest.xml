@@ -17,10 +17,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.App">
         <activity
+            android:name=".views.TorneosActivity"
+            android:exported="false" />
+        <activity
             android:name=".views.MetricasActivity"
             android:exported="false" />
         <activity
-            android:name=".views.TenisActivity"
+            android:name=".views.RankingsActivity"
             android:exported="false" />
         <activity
             android:name=".views.ActivityPrincipal"

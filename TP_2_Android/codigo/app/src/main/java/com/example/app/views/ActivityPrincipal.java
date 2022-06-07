@@ -4,10 +4,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -21,10 +17,10 @@ public class ActivityPrincipal extends AppCompatActivity {
     private Principal presenter;
     private IntentFilter filtro;
     private Button buttonVerRankings, buttonVerPartidos, buttonVerMetricas;
-    private SensorManager luzManager;
-    private Sensor sensorLuz;
-    private float medicionLuz;
-    private SensorEventListener listenerLuz;
+//    private SensorManager luzManager;
+//    private Sensor sensorLuz;
+//    private float medicionLuz;
+//    private SensorEventListener listenerLuz;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,43 +31,37 @@ public class ActivityPrincipal extends AppCompatActivity {
         String refreshToken = intentPrevio.getStringExtra("refresh_token");
 
         presenter = new Principal(this, refreshToken);
-        configurarBroadcastReciever();
+        configureBroadcastReceiver();
 
         buttonVerPartidos = findViewById(R.id.buttonVerPartidos);
         buttonVerRankings = findViewById(R.id.buttonVerRankings);
         buttonVerMetricas = findViewById(R.id.buttonVerMetricas);
 
-        luzManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        sensorLuz = luzManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+//        luzManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+//        sensorLuz = luzManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+//
+//        listenerLuz = new SensorEventListener() {
+//
+//            @Override
+//            public void onSensorChanged(SensorEvent event) {
+//                medicionLuz = event.values[0];
+//            }
+//
+//            @Override
+//            public void onAccuracyChanged(Sensor sensor, int accuracy) {}
+//        };
+//        luzManager.registerListener(listenerLuz, sensorLuz, SensorManager.SENSOR_DELAY_GAME);
 
-        listenerLuz = new SensorEventListener() {
-
-            @Override
-            public void onSensorChanged(SensorEvent event) {
-                medicionLuz = event.values[0];
-            }
-
-            @Override
-            public void onAccuracyChanged(Sensor sensor, int accuracy) {}
-        };
-        luzManager.registerListener(listenerLuz, sensorLuz, SensorManager.SENSOR_DELAY_GAME);
-
-        /*buttonVerPartidos.setOnClickListener(new View.OnClickListener() {
+        buttonVerPartidos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Si hay una luminosidad mayor o igual a 40 lumens permito escanear el QR
-                if (medicionLuz >= 40) {
-                    startActivity(new Intent(ActivityPrincipal.this, EscanearQRActivity.class));
-                }
-                else {
-                    Toast.makeText(getApplicationContext(), "No hay suficiente luz para escanear el QR", Toast.LENGTH_LONG).show();
-                }
+                startActivity(new Intent(ActivityPrincipal.this, TorneosActivity.class));
             }
-        });*/
+        });
         buttonVerRankings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(ActivityPrincipal.this, TenisActivity.class));
+                startActivity(new Intent(ActivityPrincipal.this, RankingsActivity.class));
             }
         });
         buttonVerMetricas.setOnClickListener(new View.OnClickListener() {
@@ -82,11 +72,14 @@ public class ActivityPrincipal extends AppCompatActivity {
         });
     }
 
-    private void configurarBroadcastReciever() {
-        //Metodo que registra un broadcast receiver para comunicar el servicio que recibe los
-        //mensajes del servidor con el presenter de esta activity
-        //Se registra la  accion LOGOUT_APP, para que cuando la activity de refrescar token
-        //la ejecute se invoque automaticamente el OnRecive del presenter
+    /**
+    * Metodo que registra un broadcast receiver para comunicar el servicio que recibe los
+     mensajes del servidor con el presenter de esta activity
+     Se registra la accion LOGOUT_APP, para que cuando la activity de refrescar token
+     la ejecute se llame automaticamente el OnReceive del presentador
+    * */
+    private void configureBroadcastReceiver() {
+
         filtro = new IntentFilter("com.example.intentservice.intent.action.STOP_CHECK_TOKEN");
         filtro.addCategory(Intent.CATEGORY_DEFAULT);
         registerReceiver(presenter, filtro);

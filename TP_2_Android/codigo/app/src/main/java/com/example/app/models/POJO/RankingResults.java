@@ -1,6 +1,6 @@
-package com.example.app.models;
+package com.example.app.models.POJO;
 
-public class Results
+public class RankingResults
 {
     private Jugador[] rankings;
 

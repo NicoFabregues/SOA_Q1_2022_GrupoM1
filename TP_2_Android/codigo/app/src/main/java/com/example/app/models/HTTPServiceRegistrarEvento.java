@@ -39,17 +39,17 @@ public class HTTPServiceRegistrarEvento extends HTTPService {
                     Log.i("REGISTRO DE EVENTO", "Error en envio de request");
                 }
                 else if (success != true) {
-                    Log.i("REGISTRO DE EVENTO", "Fallo en registro de evento");
+                    Log.i("REGISTRO DE EVENTO", "Falló registro de evento");
                 }
                 else {
-                    Log.i("REGISTRO DE EVENTO", "Evento registrado exitosamente");
+                    Log.i("REGISTRO DE EVENTO", "Evento registrado con éxito");
                 }
                 stopSelf();
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         } else {
-            Log.i("REGISTRO DE EVENTO", "No hay conexión a Internet");
+            Log.i("REGISTRO DE EVENTO", "No se encontró conexión a Internet");
         }
     }
 

@@ -4,13 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".views.TenisActivity">
+    tools:context=".views.TorneosActivity">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <TextView
-            android:id="@+id/tenisRankingsText"
+            android:id="@+id/tenisTorneosText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </androidx.core.widget.NestedScrollView>

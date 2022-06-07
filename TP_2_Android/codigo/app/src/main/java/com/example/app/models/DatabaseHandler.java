@@ -11,6 +11,7 @@ import java.util.List;
 
 
 public class DatabaseHandler extends SQLiteOpenHelper {
+
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "ScanYourMenu";
     private static final String TABLA_METRICAS = "metricas";
@@ -37,29 +38,33 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // Se actualiza la base de datos
-        // Elimino la tabla anterior si existiera
+        /*
+        Actualizo la BD.
+        Si existe la tabla, la elimino.
+        */
+
         db.execSQL("DROP TABLE IF EXISTS " + TABLA_METRICAS);
 
-        // Creo las tablas de nuevo
+        // Creo la tabla
         onCreate(db);
     }
 
-    // Metodo para agregar una nueva metrica
+
     public void agregarMetrica(Metrica metrica) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(KEY_TABLA_METRICAS_TIPO, metrica.getTipo()); // Tipo de metrica
-        values.put(KEY_TABLA_METRICAS_FECHA, metrica.getFecha()); // Fecha de metrica
-        values.put(KEY_TABLA_METRICAS_VALOR, metrica.getValor()); // Valor de metrica
+        values.put(KEY_TABLA_METRICAS_TIPO, metrica.getTipo());
+        values.put(KEY_TABLA_METRICAS_FECHA, metrica.getFecha());
+        values.put(KEY_TABLA_METRICAS_VALOR, metrica.getValor());
 
-        // Agrego el registro
         db.insert(TABLA_METRICAS, null, values);
-        db.close(); // Cierro la conexion a la base de datos
+
+        // Cierro la conexion a la BD.
+        db.close();
     }
 
-    // Metodo para buscar una metrica por tipo y fecha
+
     public Metrica getMetrica(String tipo, String fecha) {
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -86,7 +91,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
     }
 
-    // Metodo para traer todas las metricas existentes
+
     public List<Metrica> getAllMetricas() {
         List<Metrica> contactList = new ArrayList<Metrica>();
         String selectQuery = "SELECT * FROM " + TABLA_METRICAS;
@@ -94,7 +99,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
-        // Chequeo que el cursor no sea nulo y haya al menos un elemento como resultado de la query
+        // Chequeo que haya respuesta
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 Metrica metrica = new Metrica(Integer.parseInt(cursor.getString(0)),
@@ -103,13 +108,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                         cursor.getString(2));
                 contactList.add(metrica);
             } while (cursor.moveToNext());
-            // Cierro el cursor una vez obtuve todas las metricas
+
             cursor.close();
         }
         return contactList;
     }
 
-    // Metodo para actualizar el valor de una metrica
     public int updateMetricaValor(Metrica metrica) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -119,4 +123,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return db.update(TABLA_METRICAS, values, KEY_TABLA_METRICAS_ID + " = ?",
                 new String[] { String.valueOf(metrica.getId()) });
     }
+
+
 } 

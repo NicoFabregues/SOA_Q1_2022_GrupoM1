@@ -42,7 +42,7 @@ public class VerificacionUserSignupActivity extends AppCompatActivity {
         editTextGrupo = findViewById(R.id.editTextGrupo);
 
         presenter = new VerificacionSignupUsuario(this);
-        configurarBroadcastReciever();
+        configureBroadcastReceiver();
 
         buttonSignup.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -60,7 +60,7 @@ public class VerificacionUserSignupActivity extends AppCompatActivity {
         });
     }
 
-    private void configurarBroadcastReciever() {
+    private void configureBroadcastReceiver() {
         //Metodo que registra un broadcast receiver para comunicar el servicio que recibe los
         //mensajes del servidor con el presenter de esta activity
         //Se registra la  accion SIGNUP_RESPONSE, para que cuando el servicio de signup la ejecute

@@ -33,7 +33,7 @@ public class VerificacionUserLoginActivity extends AppCompatActivity {
         editTextPass = findViewById(R.id.editTextPass);
 
         presenter = new VerificacionLoginUsuario(this);
-        configurarBroadcastReciever();
+        configureBroadcastReceiver();
 
         buttonLogin.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -51,7 +51,7 @@ public class VerificacionUserLoginActivity extends AppCompatActivity {
         });
     }
 
-    private void configurarBroadcastReciever() {
+    private void configureBroadcastReceiver() {
         //Metodo que registra un broadcast receiver para comunicar el servicio que recibe los
         //mensajes del servidor con el presenter de esta activity
         //Se registra la  accion LOGIN_RESPONSE, para que cuando el servicio de login la ejecute

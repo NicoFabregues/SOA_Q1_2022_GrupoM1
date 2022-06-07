@@ -18,6 +18,7 @@ import java.util.Calendar;
 
 public abstract class HTTPService extends IntentService {
 
+    // URL para conexión con API de la catedra.
     private static final String URI = "http://so-unlam.net.ar";
 
     protected String url, token, refreshToken;
@@ -29,7 +30,7 @@ public abstract class HTTPService extends IntentService {
     private DatabaseHandler db;
 
     public HTTPService(String class_name) {
-        // Nombre del thread usado para debugging
+
         super(class_name);
         this.url = this.getUrl();
         this.exception = null;
@@ -40,22 +41,27 @@ public abstract class HTTPService extends IntentService {
         this.response = null;
         this.request = null;
         this.db = new DatabaseHandler(this);
+
     }
 
+    /**
+    Método que será heredado por clases hijas para crear o actualizar una metrica
+    */
     protected void updateOrCreateMetrica(String tipoMetrica) {
-        // Metodo a ser heredado por las clases hijas para crear o actualizar una metrica
+
         // Obtengo la fecha actual
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Calendar c = Calendar.getInstance();
         String fecha = sdf.format(c.getTime());
-        // Busco una metrica con el tipo dado por la clase hija y la fecha actual
+
+        // Obtengo la metrica
         Metrica metrica = db.getMetrica(tipoMetrica, fecha);
+
+        // Si existe, la actualizo, sino, la creo.
         if (metrica != null) {
-            // Si existe la actualizo
             metrica.setValor(metrica.getValor() + 1);
             db.updateMetricaValor(metrica);
         } else {
-            // Si no existe la creo
             db.agregarMetrica(new Metrica(tipoMetrica, 1, fecha));
         }
     }
@@ -72,20 +78,20 @@ public abstract class HTTPService extends IntentService {
             HttpURLConnection connection = connectionManager.abrirConexion(this.url);
             this.setConnectionHeadersPOST(connection);
 
-            //Este paquete JSON se escribe en el campo body del mensaje POST
+            // Escribo el JSON en el body del POST
             DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
 
-            // Loggeo el request enviado en el POST
+            // Loggeo el request enviado
             Log.i("POST REQUEST", request.toString());
             wr.writeBytes(request.toString());
 
             wr.flush();
             wr.close();
 
-            //Se envia el request al Servidor
+            // Envío request al server
             connection.connect();
 
-            //Se obtiene la respuesta que envio el Servidor ante el request
+            // Obtengo el responder del server y leo
             parseResponse(connection);
 
             connection.disconnect();
@@ -95,9 +101,14 @@ public abstract class HTTPService extends IntentService {
         }
     }
 
+    /**
+    * Método para leer la respuesta que devolvió el servidor.
+     * */
     private void parseResponse(HttpURLConnection connection) throws IOException, JSONException {
+
         int code = connection.getResponseCode();
-        if(code == HttpURLConnection.HTTP_OK || code == HttpURLConnection.HTTP_CREATED){
+
+        if(code == HttpURLConnection.HTTP_OK || code == HttpURLConnection.HTTP_CREATED) {
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             StringBuffer responseBuffer = new StringBuffer();
             String inputLine;
@@ -114,8 +125,7 @@ public abstract class HTTPService extends IntentService {
     }
 
     /**
-    * Método a ser utilizado por las clases que lo extiendan para agregar
-    * el endpoint y devolver la url a la que se van a conectar
+    * Método para extender y agregar el endpoint y devolver la url completa.
     */
     protected String getUrl() {
         return URI;

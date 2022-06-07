@@ -1,12 +1,20 @@
 package com.example.app.presenters;
 
-import com.example.app.models.Jugador;
-import com.example.app.models.MyResponse;
-import com.example.app.models.TenisApi;
-import com.example.app.views.TenisActivity;
+import android.util.Log;
 
+import com.example.app.models.POJO.Jugador;
+import com.example.app.models.POJO.RankingResponse;
+import com.example.app.models.POJO.TorneosResponse;
+import com.example.app.models.POJO.TorneosResult;
+import com.example.app.models.TenisApi;
+import com.example.app.views.TorneosActivity;
+import com.example.app.views.RankingsActivity;
+
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -18,10 +26,12 @@ public class ConsultasTenis {
 
     public static final String BASE_URL = "https://tennis-live-data.p.rapidapi.com/";
 
-    private TenisActivity view;
+    private RankingsActivity rankingsView;
+    private TorneosActivity torneosView;
 
-    public ConsultasTenis(TenisActivity view) {
-        this.view = view;
+    public ConsultasTenis(RankingsActivity rView, TorneosActivity pView) {
+        this.rankingsView = rView;
+        this.torneosView = pView;
     }
 
     public void getRankings() {
@@ -33,14 +43,14 @@ public class ConsultasTenis {
 
         TenisApi tenisApi = retrofit.create(TenisApi.class);
 
-        Call<MyResponse> call = tenisApi.getRankings();
+        Call<RankingResponse> call = tenisApi.getRankings();
 
-        call.enqueue(new Callback<MyResponse>() {
+        call.enqueue(new Callback<RankingResponse>() {
             @Override
-            public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
+            public void onResponse(Call<RankingResponse> call, Response<RankingResponse> response) {
 
                 if (!response.isSuccessful()) {
-                    view.setText("Codigo: " + response.code());
+                    rankingsView.setText("Codigo: " + response.code());
                     return;
                 }
 
@@ -52,19 +62,66 @@ public class ConsultasTenis {
                     content += "RANKING:\t\t" + jugador.getRanking() + "\n";
                     content += "PUNTOS:\t\t" + jugador.getRanking_points() + "\n";
                     content += "PAIS:\t\t" + jugador.getCountry() + "\n";
-                    content += "NOMBRE COMPLETO:\t\t" + jugador.getFull_name() + "\n";
-                    content += "Movimiento:\t\t" + jugador.getMovement() + "\n\n";
-                    view.append(content);
+                    content += "NOMBRE COMPLETO:\t\t" + jugador.getFull_name() + "\n\n";
+                    rankingsView.append(content);
                 }
             }
 
             @Override
-            public void onFailure(Call<MyResponse> call, Throwable t) {
-
-                view.setText(t.getMessage());
-
+            public void onFailure(Call<RankingResponse> call, Throwable t) {
+                rankingsView.setText(t.getMessage());
             }
         });
+    }
+
+
+    public void getTorneos() {
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        TenisApi tenisApi = retrofit.create(TenisApi.class);
+
+        String year = new SimpleDateFormat("yyyy", Locale.getDefault()).format(new Date());
+        Log.e("AÑO: ", year);
+        Call<TorneosResponse> call = tenisApi.getTorneos(year);
+
+        call.enqueue(new Callback<TorneosResponse>() {
+            @Override
+            public void onResponse(Call<TorneosResponse> call, Response<TorneosResponse> response) {
+
+                if(!response.isSuccessful()) {
+                    torneosView.setText("Codigo: " + response.code());
+                    return;
+                }
+                if(response.body() == null){
+                    Log.e("RESPONSE", "NULL");
+                    return;
+                }
+                Log.e("RESPONSE", response.toString());
+
+                TorneosResponse myResponse = response.body();
+                Log.e("BODY", myResponse.toString());
+
+                for (TorneosResult torneo : myResponse.getResults()) {
+                    String content = "";
+                    content += "id:\t\t" + torneo.getId() + "\n";
+                    content += "Nombre:\t\t" + torneo.getName() + "\n";
+                    content += "Ciudad:\t\t" + torneo.getCity() + " - " + torneo.getCountry() + "\n";
+                    content += "Superficie:\t\t" + torneo.getSurface() + "\n";
+                    content += "Temporada:\t\t" + torneo.getSeason() + "\n\n";
+                    torneosView.append(content);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<TorneosResponse> call, Throwable t) {
+                torneosView.setText(t.getMessage());
+            }
+        });
+
     }
 
 

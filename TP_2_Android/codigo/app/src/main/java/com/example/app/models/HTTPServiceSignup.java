@@ -9,10 +9,9 @@ import org.json.JSONObject;
 
 public class HTTPServiceSignup extends HTTPService{
 
-    // Nombre del thread usado para debugging
     private static final String class_name = HTTPServiceSignup.class.getSimpleName();
     private static final String ENDPOINT = "/api/api/register";
-    private static final String TIPO_METRICA = "Cantidad de nuevos usuarios";
+    private static final String TIPO_METRICA = "Cant Registros";
 
     private DatabaseHandler db;
 
@@ -35,15 +34,15 @@ public class HTTPServiceSignup extends HTTPService{
                 if (exception != null) {
                     Intent i = new Intent("com.example.intentservice.intent.action.SIGNUP_RESPONSE");
                     i.putExtra("success", success);
-                    i.putExtra("mensaje", "Error en envio de request");
-                    //Se envian los valores al bradcast reciever del presenter de login
+                    i.putExtra("mensaje", "Error al enviar Request");
+                    // Envío de valores al broadcast receiver del presenter de login
                     sendBroadcast(i);
                 }
                 else if (!success) {
                     Intent i = new Intent("com.example.intentservice.intent.action.SIGNUP_RESPONSE");
                     i.putExtra("success", success);
-                    i.putExtra("mensaje", "Error en datos de request");
-                    //Se envian los valores al bradcast reciever del presenter de login
+                    i.putExtra("mensaje", "Error de datos del Request");
+                    // Envío de valores al broadcast receiver del presenter de login
                     sendBroadcast(i);
                 }
                 else {
@@ -52,10 +51,10 @@ public class HTTPServiceSignup extends HTTPService{
                     updateOrCreateMetrica();
                     Intent i = new Intent("com.example.intentservice.intent.action.SIGNUP_RESPONSE");
                     i.putExtra("success", success);
-                    i.putExtra("mensaje", "Usuario registrado exitosamente");
+                    i.putExtra("mensaje", "Usuario registrado con éxito");
                     i.putExtra("token", token);
                     i.putExtra("refresh_token", refreshToken);
-                    //Se envian los valores al bradcast reciever del presenter de login
+                    // Envío de valores al broadcast receiver del presenter de login
                     sendBroadcast(i);
                 }
                 stopSelf();
@@ -65,8 +64,8 @@ public class HTTPServiceSignup extends HTTPService{
         } else {
             Intent i = new Intent("com.example.intentservice.intent.action.SIGNUP_RESPONSE");
             i.putExtra("success", success);
-            i.putExtra("mensaje", "No hay conexión a Internet");
-            //Se envian los valores al bradcast reciever del presenter de login
+            i.putExtra("mensaje", "No se encontró conexión a Internet");
+            // Envío de valores al broadcast receiver del presenter de login
             sendBroadcast(i);
         }
     }

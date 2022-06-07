@@ -28,7 +28,6 @@ public class RequestTask extends AsyncTask<Void, Void, Void> {
     protected RefrescarToken caller;
 
     public RequestTask(String refreshToken, RefrescarToken refrescarToken) {
-        // Nombre del thread usado para debugging
         super();
         this.url = this.getUrl();
         this.exception = null;
@@ -56,10 +55,10 @@ public class RequestTask extends AsyncTask<Void, Void, Void> {
             HttpURLConnection connection = connectionManager.abrirConexion(this.url);
             this.setConnectionHeadersPUT(connection);
 
-            //Se envia el request al Servidor
+            // Se envia el request
             connection.connect();
 
-            //Se obtiene la respuesta que envio el Servidor ante el request
+            // Se parsea el response
             parseResponse(connection);
 
             connection.disconnect();
@@ -89,14 +88,14 @@ public class RequestTask extends AsyncTask<Void, Void, Void> {
             else {
                 Intent i = new Intent();
                 i.putExtra("success", false);
-                i.putExtra("mensaje", "Ocurrio un error con el refresh del token");
+                i.putExtra("mensaje", "Hubo un problema al refrescar el token");
                 caller.actualizarActivity(i);
             }
         } else {
             Intent i = new Intent();
             i.putExtra("success", false);
-            i.putExtra("mensaje", "No hay  conexión a Internet");
-            //Se envian los valores al bradcast reciever del presenter de login
+            i.putExtra("mensaje", "No se encontró conexión a Internet");
+            // Envío de valores al broadcast receiver del presenter de login
             caller.actualizarActivity(i);
         }
     }
