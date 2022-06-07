@@ -7,13 +7,16 @@ import android.content.Intent;
 
 import com.example.app.models.ServiceCheckTokenExpiration;
 import com.example.app.views.ActivityPrincipal;
+import com.example.app.views.MetricasActivity;
+import com.example.app.views.TenisActivity;
 
-public class Principal extends BroadcastReceiver {
+public class Principal extends Sensores {
 
     private ActivityPrincipal view;
     private Intent intentServiceCheckTokenExpiration;
 
     public Principal(ActivityPrincipal view, String refreshToken) {
+        super(view, TenisActivity.class);
         this.view = view;
         this.intentServiceCheckTokenExpiration = new Intent(view, ServiceCheckTokenExpiration.class);
         this.startCheckTokenService(refreshToken);

@@ -3,6 +3,8 @@ package com.example.app.presenters;
 import com.example.app.models.Jugador;
 import com.example.app.models.MyResponse;
 import com.example.app.models.TenisApi;
+import com.example.app.views.ActivityPrincipal;
+import com.example.app.views.MetricasActivity;
 import com.example.app.views.TenisActivity;
 
 import java.util.Arrays;
@@ -14,14 +16,16 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class ConsultasTenis {
+public class ConsultasTenis extends Sensores{
 
     public static final String BASE_URL = "https://tennis-live-data.p.rapidapi.com/";
 
     private TenisActivity view;
 
     public ConsultasTenis(TenisActivity view) {
+        super(view, MetricasActivity.class);
         this.view = view;
+
     }
 
     public void getRankings() {
