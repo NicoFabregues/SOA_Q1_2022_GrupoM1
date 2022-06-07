@@ -7,6 +7,7 @@ import com.example.app.models.POJO.RankingResponse;
 import com.example.app.models.POJO.TorneosResponse;
 import com.example.app.models.POJO.TorneosResult;
 import com.example.app.models.TenisApi;
+import com.example.app.views.MetricasActivity;
 import com.example.app.views.TorneosActivity;
 import com.example.app.views.RankingsActivity;
 
@@ -22,7 +23,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class ConsultasTenis {
+public class ConsultasTenis extends Sensores{
 
     public static final String BASE_URL = "https://tennis-live-data.p.rapidapi.com/";
 
@@ -30,6 +31,7 @@ public class ConsultasTenis {
     private TorneosActivity torneosView;
 
     public ConsultasTenis(RankingsActivity rView, TorneosActivity pView) {
+        super(rView==null?pView:rView,rView==null? MetricasActivity.class:TorneosActivity.class);
         this.rankingsView = rView;
         this.torneosView = pView;
     }
