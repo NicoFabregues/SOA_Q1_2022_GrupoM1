@@ -7,37 +7,32 @@ import java.util.Date;
 public class Metrica {
 
     private int id;
-    private String tipo;
-    private int valor;
+    private String user;
     private Date fecha;
-    private final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+    private final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
     public Metrica() {
     }
 
-    public Metrica(String tipo, int valor, String fecha) {
-        this.tipo = tipo;
-        this.valor = valor;
+    public Metrica(String user, String fecha) {
+        this.user = user;
         this.setFecha(fecha);
     }
 
-    public Metrica(int id, String tipo, int valor, String fecha) {
+    public Metrica(int id, String user, String fecha) {
         this.id = id;
-        this.tipo = tipo;
-        this.valor = valor;
+        this.user = user;
         this.setFecha(fecha);
     }
 
-    public Metrica(int id, String tipo, int valor, Date fecha) {
+    public Metrica(int id, String user, Date fecha) {
         this.id = id;
-        this.tipo = tipo;
-        this.valor = valor;
+        this.user = user;
         this.fecha = fecha;
     }
 
-    public Metrica(String tipo, int valor, Date fecha) {
-        this.tipo = tipo;
-        this.valor = valor;
+    public Metrica(String user, Date fecha) {
+        this.user = user;
         this.fecha = fecha;
     }
 
@@ -45,22 +40,13 @@ public class Metrica {
         return id;
     }
 
-    public String getTipo() {
-        return tipo;
-    }
 
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
+    public void setUser(String user) {
+        this.user = user;
     }
-
-    public int getValor() {
-        return valor;
+    public String getUser() {
+        return user;
     }
-
-    public void setValor(int valor) {
-        this.valor = valor;
-    }
-
     public String getFecha() {
         return formatter.format(fecha);
     }
@@ -75,6 +61,6 @@ public class Metrica {
 
     @Override
     public String toString() {
-        return tipo +  " el dia " + this.getFecha() + ": " + valor;
+        return user +  " " + this.getFecha();
     }
 }

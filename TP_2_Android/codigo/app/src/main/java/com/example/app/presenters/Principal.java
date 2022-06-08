@@ -1,11 +1,9 @@
 package com.example.app.presenters;
 
 import android.app.ActivityManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.example.app.models.ServiceCheckTokenExpiration;
 import com.example.app.views.ActivityPrincipal;
 import com.example.app.views.RankingsActivity;
 
@@ -14,18 +12,12 @@ public class Principal extends Sensores {
     private ActivityPrincipal view;
     private Intent intentServiceCheckTokenExpiration;
 
-    public Principal(ActivityPrincipal view, String refreshToken) {
+    public Principal(ActivityPrincipal view) {
         super(view, RankingsActivity.class);
         this.view = view;
-        this.intentServiceCheckTokenExpiration = new Intent(view, ServiceCheckTokenExpiration.class);
-        this.startCheckTokenService(refreshToken);
     }
 
-    private void startCheckTokenService(String refreshToken) {
-        if (!this.isMyServiceRunning(ServiceCheckTokenExpiration.class))
-            this.intentServiceCheckTokenExpiration.putExtra("refresh_token", refreshToken);
-            this.view.startService(this.intentServiceCheckTokenExpiration);
-    }
+
 
     private boolean isMyServiceRunning(Class<?> serviceClass) {
         ActivityManager manager = (ActivityManager) this.view.getSystemService(Context.ACTIVITY_SERVICE);

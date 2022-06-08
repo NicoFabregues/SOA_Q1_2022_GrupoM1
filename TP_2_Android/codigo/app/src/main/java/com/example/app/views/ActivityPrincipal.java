@@ -24,9 +24,8 @@ public class ActivityPrincipal extends AppCompatActivity {
         setContentView(R.layout.activity_principal);
 
         intentPrevio = getIntent();
-        String refreshToken = intentPrevio.getStringExtra("refresh_token");
 
-        presenter = new Principal(this, refreshToken);
+        presenter = new Principal(this);
         configureBroadcastReceiver();
 
         buttonVerPartidos = findViewById(R.id.buttonVerPartidos);
@@ -57,7 +56,6 @@ public class ActivityPrincipal extends AppCompatActivity {
     /**
     * Metodo que registra un broadcast receiver para comunicar el servicio que recibe los
      mensajes del servidor con el presenter de esta activity
-     Se registra la accion LOGOUT_APP, para que cuando la activity de refrescar token
      la ejecute se llame automaticamente el OnReceive del presentador
     * */
     private void configureBroadcastReceiver() {
