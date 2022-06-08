@@ -24,7 +24,7 @@ public class Principal extends Sensores {
     private void startCheckTokenService(String refreshToken) {
         if (!this.isMyServiceRunning(ServiceCheckTokenExpiration.class))
             this.intentServiceCheckTokenExpiration.putExtra("refresh_token", refreshToken);
-            this.view.startService(this.intentServiceCheckTokenExpiration);
+        this.view.startService(this.intentServiceCheckTokenExpiration);
     }
 
     private boolean isMyServiceRunning(Class<?> serviceClass) {

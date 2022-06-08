@@ -45,8 +45,8 @@ public abstract class HTTPService extends IntentService {
     }
 
     /**
-    Método que será heredado por clases hijas para crear o actualizar una metrica
-    */
+     Método que será heredado por clases hijas para crear o actualizar una metrica
+     */
     protected void updateOrCreateMetrica(String tipoMetrica) {
 
         // Obtengo la fecha actual
@@ -102,7 +102,7 @@ public abstract class HTTPService extends IntentService {
     }
 
     /**
-    * Método para leer la respuesta que devolvió el servidor.
+     * Método para leer la respuesta que devolvió el servidor.
      * */
     private void parseResponse(HttpURLConnection connection) throws IOException, JSONException {
 
@@ -125,8 +125,8 @@ public abstract class HTTPService extends IntentService {
     }
 
     /**
-    * Método para extender y agregar el endpoint y devolver la url completa.
-    */
+     * Método para extender y agregar el endpoint y devolver la url completa.
+     */
     protected String getUrl() {
         return URI;
     }

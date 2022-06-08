@@ -16,7 +16,7 @@ public class ActivityPrincipal extends AppCompatActivity {
     private Intent intentPrevio;
     private Principal presenter;
     private IntentFilter filtro;
-    private Button buttonVerRankings, buttonVerPartidos, buttonVerMetricas;
+    private Button buttonVerRankings, buttonVerTorneos, buttonVerMetricas;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,12 +29,12 @@ public class ActivityPrincipal extends AppCompatActivity {
         presenter = new Principal(this, refreshToken);
         configureBroadcastReceiver();
 
-        buttonVerPartidos = findViewById(R.id.buttonVerPartidos);
+        buttonVerTorneos = findViewById(R.id.buttonVerTorneos);
         buttonVerRankings = findViewById(R.id.buttonVerRankings);
         buttonVerMetricas = findViewById(R.id.buttonVerMetricas);
 
 
-        buttonVerPartidos.setOnClickListener(new View.OnClickListener() {
+        buttonVerTorneos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(ActivityPrincipal.this, TorneosActivity.class));
@@ -55,13 +55,12 @@ public class ActivityPrincipal extends AppCompatActivity {
     }
 
     /**
-    * Metodo que registra un broadcast receiver para comunicar el servicio que recibe los
+     * Metodo que registra un broadcast receiver para comunicar el servicio que recibe los
      mensajes del servidor con el presenter de esta activity
      Se registra la accion LOGOUT_APP, para que cuando la activity de refrescar token
      la ejecute se llame automaticamente el OnReceive del presentador
-    * */
+     * */
     private void configureBroadcastReceiver() {
-
         filtro = new IntentFilter("com.example.intentservice.intent.action.STOP_CHECK_TOKEN");
         filtro.addCategory(Intent.CATEGORY_DEFAULT);
         registerReceiver(presenter, filtro);

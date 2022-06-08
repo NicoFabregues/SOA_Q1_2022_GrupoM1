@@ -10,7 +10,7 @@ import com.example.app.presenters.ConsultasTenis;
 
 public class TorneosActivity extends AppCompatActivity {
 
-    private TextView mTenisPartidosView;
+    private TextView mTenisTorneosView;
     private ConsultasTenis presenter;
 
     @Override
@@ -18,7 +18,7 @@ public class TorneosActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView( R.layout.activity_torneos);
 
-        mTenisPartidosView = findViewById(R.id.tenisTorneosText);
+        mTenisTorneosView = findViewById(R.id.tenisTorneosText);
 
         presenter = new ConsultasTenis(null, this);
 
@@ -30,10 +30,10 @@ public class TorneosActivity extends AppCompatActivity {
     }
 
     public void setText(String s) {
-        mTenisPartidosView.setText(s);
+        mTenisTorneosView.setText(s);
     }
 
     public void append(String content) {
-        mTenisPartidosView.append(content);
+        mTenisTorneosView.append(content);
     }
 }

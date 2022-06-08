@@ -29,7 +29,7 @@ public class VerificacionUserLoginActivity extends AppCompatActivity {
         buttonLogin = findViewById(R.id.buttonLogin);
         buttonSignup = findViewById(R.id.buttonSignup);
 
-        editTextMail = findViewById(R.id.editTextMail);  
+        editTextMail = findViewById(R.id.editTextMail);
         editTextPass = findViewById(R.id.editTextPass);
 
         presenter = new VerificacionLoginUsuario(this);

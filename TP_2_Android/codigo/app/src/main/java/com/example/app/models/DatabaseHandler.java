@@ -13,7 +13,7 @@ import java.util.List;
 public class DatabaseHandler extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 1;
-    private static final String DATABASE_NAME = "ScanYourMenu";
+    private static final String DATABASE_NAME = "TennisTracker";
     private static final String TABLA_METRICAS = "metricas";
     private static final String KEY_TABLA_METRICAS_ID = "id";
     private static final String KEY_TABLA_METRICAS_FECHA = "fecha";
@@ -29,20 +29,17 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         // Creo las tablas
         String CREATE_CONTACTS_TABLE =
                 "CREATE TABLE " + TABLA_METRICAS + "("
-                + KEY_TABLA_METRICAS_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
-                + KEY_TABLA_METRICAS_TIPO + " TEXT NOT NULL,"
-                + KEY_TABLA_METRICAS_FECHA + " TEXT NOT NULL,"
-                + KEY_TABLA_METRICAS_VALOR + " INTEGER NOT NULL" + ")";
+                        + KEY_TABLA_METRICAS_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
+                        + KEY_TABLA_METRICAS_TIPO + " TEXT NOT NULL,"
+                        + KEY_TABLA_METRICAS_FECHA + " TEXT NOT NULL,"
+                        + KEY_TABLA_METRICAS_VALOR + " INTEGER NOT NULL" + ")";
         db.execSQL(CREATE_CONTACTS_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        /*
-        Actualizo la BD.
-        Si existe la tabla, la elimino.
-        */
-
+        // Actualizo la BD.
+        // Si existe la tabla, la elimino.
         db.execSQL("DROP TABLE IF EXISTS " + TABLA_METRICAS);
 
         // Creo la tabla
@@ -60,7 +57,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         db.insert(TABLA_METRICAS, null, values);
 
-        // Cierro la conexion a la BD.
+        // Cierro la conexión a la BD.
         db.close();
     }
 
