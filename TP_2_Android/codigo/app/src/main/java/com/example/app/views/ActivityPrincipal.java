@@ -17,10 +17,6 @@ public class ActivityPrincipal extends AppCompatActivity {
     private Principal presenter;
     private IntentFilter filtro;
     private Button buttonVerRankings, buttonVerPartidos, buttonVerMetricas;
-//    private SensorManager luzManager;
-//    private Sensor sensorLuz;
-//    private float medicionLuz;
-//    private SensorEventListener listenerLuz;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,20 +33,6 @@ public class ActivityPrincipal extends AppCompatActivity {
         buttonVerRankings = findViewById(R.id.buttonVerRankings);
         buttonVerMetricas = findViewById(R.id.buttonVerMetricas);
 
-//        luzManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-//        sensorLuz = luzManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-//
-//        listenerLuz = new SensorEventListener() {
-//
-//            @Override
-//            public void onSensorChanged(SensorEvent event) {
-//                medicionLuz = event.values[0];
-//            }
-//
-//            @Override
-//            public void onAccuracyChanged(Sensor sensor, int accuracy) {}
-//        };
-//        luzManager.registerListener(listenerLuz, sensorLuz, SensorManager.SENSOR_DELAY_GAME);
 
         buttonVerPartidos.setOnClickListener(new View.OnClickListener() {
             @Override
