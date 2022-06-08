@@ -65,7 +65,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public Metrica getMetrica(String user) {
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Log.e("",user);
         Cursor cursor = db.query(TABLA_METRICAS,
                 new String[] { KEY_TABLA_METRICAS_ID, KEY_TABLA_METRICAS_USER,
                         KEY_TABLA_METRICAS_FECHA},

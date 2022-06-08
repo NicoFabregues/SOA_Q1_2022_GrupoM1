@@ -39,7 +39,7 @@ public class VerificacionLoginUsuario extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        // Método para recibir el resultado del servicio de login55
+        // Método para recibir el resultado del servicio de login
         boolean success = intent.getBooleanExtra("success", false);
         String mensaje = intent.getStringExtra("mensaje");
         this.view.mostrarToastMake(mensaje);

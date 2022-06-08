@@ -58,7 +58,7 @@ public class User {
     }
 
     public String getUser(){
-        return (this.email );//+ " " + this.apellido);
+        return this.email;
     }
 
     public JSONObject getJSONForSignup(){
