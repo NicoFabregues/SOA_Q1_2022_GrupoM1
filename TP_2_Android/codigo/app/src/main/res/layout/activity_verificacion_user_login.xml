@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/tennis_1"
     tools:context=".views.VerificacionUserLoginActivity">
 
     <TextView
@@ -11,7 +12,7 @@
         android:layout_width="291dp"
         android:layout_height="45dp"
         android:layout_marginTop="76dp"
-        android:text="Por favor ingrese su usuario y contraseña, en caso de no poseer uno registrese primero."
+        android:text="Ingrese usuario y contraseña, en caso de no poseer uno, registrese."
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -45,7 +46,7 @@
         android:ems="10"
         android:inputType="textEmailAddress"
         android:minHeight="48dp"
-        android:hint="Email"
+        android:hint="Mail"
         app:layout_constraintBottom_toTopOf="@+id/editTextPass"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.496"

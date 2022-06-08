@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/tennis_1"
     tools:context=".views.EnvioSMSActivity">
 
     <TextView
@@ -11,7 +12,7 @@
         android:layout_width="280dp"
         android:layout_height="41dp"
         android:layout_marginTop="76dp"
-        android:text="Por favor ingrese su número de celular. Se le enviará un código de confirmación"
+        android:text="Ingrese su número, se le enviará un código de verificación."
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent"
@@ -39,4 +40,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewInfoNumCelular"
         app:layout_constraintVertical_bias="0.484" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
