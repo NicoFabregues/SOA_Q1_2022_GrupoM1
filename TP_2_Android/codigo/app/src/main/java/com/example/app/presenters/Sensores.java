@@ -33,24 +33,23 @@ public abstract class Sensores extends BroadcastReceiver {
     private int brillo;
     private static final int DIVLUZ = 400, INTERVALOLUZ = 60000;
     private static final double  MULTLUZ = 2.54;
-    private static double luztiempo =0;
+    private static double luztiempo = 0;
 
-    public Sensores(AppCompatActivity view, Class<?> sigiente) {
+    public Sensores(AppCompatActivity view, Class<?> siguiente) {
 
         listenerAcelerometro = new SensorEventListener() {
             @Override
             public void onSensorChanged (SensorEvent event){
 
                 float x=event.values[0];
-                float velocidad = x*x*ESCALA;
+                float velocidad = x * x * ESCALA;
 
-
-                if (velocidad > UMBRAL_AGITACION&&x<0) {
+                if (velocidad > UMBRAL_AGITACION && x < 0) {
                     if(System.currentTimeMillis()- actiempo >INTERVALO)
                     {
                         unregisterListener();
                         actiempo =System.currentTimeMillis();
-                        view.startActivity(new Intent(view, sigiente));
+                        view.startActivity(new Intent(view, siguiente));
                         view.recreate();
                     }
                 }

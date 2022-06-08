@@ -8,11 +8,11 @@
     tools:context=".views.ActivityPrincipal">
 
     <Button
-        android:id="@+id/buttonVerPartidos"
+        android:id="@+id/buttonVerTorneos"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="200dp"
-        android:text="Ver partidos"
+        android:text="Ver Torneos"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -39,7 +39,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="40dp"
         android:text="Ver metricas"
-        app:layout_constraintBottom_toTopOf="@+id/buttonVerPartidos"
+        app:layout_constraintBottom_toTopOf="@+id/buttonVerTorneos"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.494"
         app:layout_constraintStart_toStartOf="parent"

@@ -53,18 +53,17 @@ public class VerificacionUserSignupActivity extends AppCompatActivity {
                 presenter.setPass(editTextPass.getText().toString());
                 presenter.setComision(editTextComision.getText().toString());
                 presenter.setGrupo(editTextGrupo.getText().toString());
-                // Trato de registrarme, en caso de poder registrarme correctamente
-                // vuelvo a la actividad del login
+                // Intento registrarme, en caso de poder vuelvo a la actividad del login
                 presenter.signUp();
             }
         });
     }
 
     private void configureBroadcastReceiver() {
-        //Metodo que registra un broadcast receiver para comunicar el servicio que recibe los
-        //mensajes del servidor con el presenter de esta activity
-        //Se registra la  accion SIGNUP_RESPONSE, para que cuando el servicio de signup la ejecute
-        //se invoque automaticamente el OnRecive del presenter
+        // Metodo que registra un broadcast receiver para comunicar el servicio que recibe los
+        // mensajes del servidor con el presenter de esta activity
+        // Se registra la  accion SIGNUP_RESPONSE, para que cuando el servicio de signup la ejecute
+        // se invoque automaticamente el OnReceive del presenter
         filtro = new IntentFilter("com.example.intentservice.intent.action.SIGNUP_RESPONSE");
         filtro.addCategory(Intent.CATEGORY_DEFAULT);
         registerReceiver(presenter, filtro);

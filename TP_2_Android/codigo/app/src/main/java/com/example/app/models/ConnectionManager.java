@@ -4,6 +4,8 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import com.example.app.presenters.ConsultasTenis;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -23,7 +25,7 @@ public class ConnectionManager {
         return (HttpURLConnection) obj.openConnection();
     }
 
-    boolean hayConexion() {
+    public boolean hayConexion() {
         return internetConectado() || redConectado();
     }
 

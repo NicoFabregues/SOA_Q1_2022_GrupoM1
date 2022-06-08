@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +32,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 + KEY_TABLA_METRICAS_USER + " TEXT NOT NULL,"
                 + KEY_TABLA_METRICAS_FECHA + " TEXT NOT NULL" + ")";
         db.execSQL(CREATE_CONTACTS_TABLE);
-        Log.e("",CREATE_CONTACTS_TABLE);
     }
 
     @Override
@@ -77,7 +75,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 null,
                 null,
                 null);
-        Log.e("","dssadsadsa");
         // Chequeo que el cursor no sea nulo y haya al menos un elemento como resultado de la query
         if (cursor != null && cursor.moveToFirst()) {
             Metrica metrica = new Metrica(Integer.parseInt(cursor.getString(0)),
