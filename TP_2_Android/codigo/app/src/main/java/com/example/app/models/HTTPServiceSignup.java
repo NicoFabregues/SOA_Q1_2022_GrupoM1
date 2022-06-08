@@ -47,13 +47,11 @@ public class HTTPServiceSignup extends HTTPService{
                 }
                 else {
                     token = response.getString("token");
-                    refreshToken = response.getString("token_refresh");
                     updateOrCreateMetrica();
                     Intent i = new Intent("com.example.intentservice.intent.action.SIGNUP_RESPONSE");
                     i.putExtra("success", success);
                     i.putExtra("mensaje", "Usuario registrado con éxito");
                     i.putExtra("token", token);
-                    i.putExtra("refresh_token", refreshToken);
                     // Envío de valores al broadcast receiver del presenter de login
                     sendBroadcast(i);
                 }

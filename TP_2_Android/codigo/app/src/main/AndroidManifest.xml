@@ -32,9 +32,6 @@
             android:name=".views.ActivityPrincipal"
             android:exported="true" />
         <activity
-            android:name=".views.RefrescarTokenActivity"
-            android:exported="false" />
-        <activity
             android:name=".views.EnvioSMSActivity"
             android:exported="true" />
         <activity
@@ -66,10 +63,6 @@
             android:exported="true" />
         <service
             android:name=".models.HTTPServiceRegistrarEvento"
-            android:enabled="true"
-            android:exported="true" />
-        <service
-            android:name=".models.ServiceCheckTokenExpiration"
             android:enabled="true"
             android:exported="true" />
     </application>

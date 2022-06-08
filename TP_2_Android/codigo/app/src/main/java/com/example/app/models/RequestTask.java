@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.example.app.presenters.RefrescarToken;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -14,32 +12,20 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
-import java.util.concurrent.Semaphore;
 
 public class RequestTask extends AsyncTask<Void, Void, Void> {
 
     private static final String URI = "http://so-unlam.net.ar";
     private static final String ENDPOINT = "/api/api/refresh";
 
-    protected String url, token, refreshToken;
+    protected String url, token;
     protected ConnectionManager connectionManager;
     protected JSONObject response;
     protected Exception exception;
-    protected RefrescarToken caller;
 
-    public RequestTask(String refreshToken, RefrescarToken refrescarToken) {
-        super();
-        this.url = this.getUrl();
-        this.exception = null;
-        this.token = "";
-        this.refreshToken = refreshToken;
-        this.connectionManager = refrescarToken.getConnectionManager();
-        this.caller = refrescarToken;
-    }
 
     @Override
     protected Void doInBackground(Void... voids) {
-        this.enviarPeticion();
         return null;
     }
 
@@ -47,7 +33,7 @@ public class RequestTask extends AsyncTask<Void, Void, Void> {
         connection.setDoOutput(true);
         connection.setRequestMethod("PUT");
         connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-        connection.setRequestProperty("Authorization",  "Bearer " + refreshToken);
+        connection.setRequestProperty("Authorization",  "Bearer ");
     }
 
     protected void PUT() {
@@ -68,37 +54,6 @@ public class RequestTask extends AsyncTask<Void, Void, Void> {
         }
     }
 
-    private void enviarPeticion() {
-        if(connectionManager.hayConexion()){
-            PUT();
-            if (exception != null) {
-                Intent i = new Intent();
-                i.putExtra("success", false);
-                i.putExtra("mensaje", "Error en envio de request");
-                caller.actualizarActivity(i);
-            }
-            else if(!token.isEmpty()) {
-                Intent i = new Intent();
-                i.putExtra("success", true);
-                i.putExtra("mensaje", "Token actualizado");
-                i.putExtra("token", token);
-                i.putExtra("refresh_token", refreshToken);
-                caller.actualizarActivity(i);
-            }
-            else {
-                Intent i = new Intent();
-                i.putExtra("success", false);
-                i.putExtra("mensaje", "Hubo un problema al refrescar el token");
-                caller.actualizarActivity(i);
-            }
-        } else {
-            Intent i = new Intent();
-            i.putExtra("success", false);
-            i.putExtra("mensaje", "No se encontró conexión a Internet");
-            // Envío de valores al broadcast receiver del presenter de login
-            caller.actualizarActivity(i);
-        }
-    }
 
     private void parseResponse(HttpURLConnection connection) throws IOException, JSONException {
         if(connection.getResponseCode() == HttpURLConnection.HTTP_OK){
@@ -114,7 +69,6 @@ public class RequestTask extends AsyncTask<Void, Void, Void> {
             response = new JSONObject(responseBuffer.toString());
             Log.i("RESPONSE", response.toString());
             token = response.getString("token");
-            refreshToken = response.getString("token_refresh");
         }
     }
 

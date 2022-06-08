@@ -13,7 +13,6 @@ public class HTTPServiceLogin extends HTTPService{
     private static final String ENDPOINT = "/api/api/login";
     private static final String TYPE_EVENTS = "Login usuario";
     private static final String EVENT_DESCRIPTION = "Registro login de usuario en Servidor";
-    private static final String TIPO_METRICA = "Cant Login";
     private Intent intentServiceRegistrarEvento;
 
     public HTTPServiceLogin() {
@@ -29,8 +28,8 @@ public class HTTPServiceLogin extends HTTPService{
         startService(this.intentServiceRegistrarEvento);
     }
 
-    protected void updateOrCreateMetrica() {
-        super.updateOrCreateMetrica(TIPO_METRICA);
+    protected void updateOrCreateMetrica(String user) {
+        super.updateOrCreateMetrica(user);
     }
 
     @Override
@@ -57,14 +56,12 @@ public class HTTPServiceLogin extends HTTPService{
                 }
                 else {
                     token = response.getString("token");
-                    refreshToken = response.getString("token_refresh");
-                    updateOrCreateMetrica();
+                    updateOrCreateMetrica(intent.getStringExtra("user"));
                     startHTTPServiceRegistrarEvento();
                     Intent i = new Intent("com.example.intentservice.intent.action.LOGIN_RESPONSE");
                     i.putExtra("success", success);
                     i.putExtra("mensaje", "Login exitoso");
                     i.putExtra("token", token);
-                    i.putExtra("refresh_token", refreshToken);
                     // Envío de valores al broadcast receiver del presenter de login
                     sendBroadcast(i);
                 }

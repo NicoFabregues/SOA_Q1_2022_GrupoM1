@@ -21,7 +21,7 @@ public abstract class HTTPService extends IntentService {
     // URL para conexión con API de la catedra.
     private static final String URI = "http://so-unlam.net.ar";
 
-    protected String url, token, refreshToken;
+    protected String url, token;
     protected ConnectionManager connectionManager;
     protected JSONObject request;
     protected JSONObject response;
@@ -35,7 +35,6 @@ public abstract class HTTPService extends IntentService {
         this.url = this.getUrl();
         this.exception = null;
         this.token = "";
-        this.refreshToken = "";
         this.success = false;
         this.connectionManager = new ConnectionManager(this);
         this.response = null;
@@ -45,24 +44,24 @@ public abstract class HTTPService extends IntentService {
     }
 
     /**
-     Método que será heredado por clases hijas para crear o actualizar una metrica
-     */
-    protected void updateOrCreateMetrica(String tipoMetrica) {
+    Método que será heredado por clases hijas para crear o actualizar una metrica
+    */
+    protected void updateOrCreateMetrica(String user) {
 
         // Obtengo la fecha actual
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         Calendar c = Calendar.getInstance();
         String fecha = sdf.format(c.getTime());
 
         // Obtengo la metrica
-        Metrica metrica = db.getMetrica(tipoMetrica, fecha);
+        Metrica metrica = db.getMetrica(user);
 
         // Si existe, la actualizo, sino, la creo.
         if (metrica != null) {
-            metrica.setValor(metrica.getValor() + 1);
+            metrica.setFecha(fecha);
             db.updateMetricaValor(metrica);
         } else {
-            db.agregarMetrica(new Metrica(tipoMetrica, 1, fecha));
+            db.agregarMetrica(new Metrica(user, fecha));
         }
     }
 
@@ -102,7 +101,7 @@ public abstract class HTTPService extends IntentService {
     }
 
     /**
-     * Método para leer la respuesta que devolvió el servidor.
+    * Método para leer la respuesta que devolvió el servidor.
      * */
     private void parseResponse(HttpURLConnection connection) throws IOException, JSONException {
 
@@ -125,8 +124,8 @@ public abstract class HTTPService extends IntentService {
     }
 
     /**
-     * Método para extender y agregar el endpoint y devolver la url completa.
-     */
+    * Método para extender y agregar el endpoint y devolver la url completa.
+    */
     protected String getUrl() {
         return URI;
     }

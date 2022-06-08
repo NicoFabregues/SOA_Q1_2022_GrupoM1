@@ -33,18 +33,19 @@ public class VerificacionLoginUsuario extends BroadcastReceiver {
     public void logIn(){
         JSONObject req = this.user.getJSONForLogIn();
         this.intentServiceLogin.putExtra("jsonObject", req.toString());
+        this.intentServiceLogin.putExtra("user", user.getUser());
         this.view.startService(this.intentServiceLogin);
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        // Método para recibir el resultado del servicio de login
+        // Método para recibir el resultado del servicio de login55
         boolean success = intent.getBooleanExtra("success", false);
         String mensaje = intent.getStringExtra("mensaje");
         this.view.mostrarToastMake(mensaje);
         if (success) {
             //Ejecuto método de llamado de siguiente activity
-            this.view.lanzarActivityPrincipal(intent.getStringExtra("token"), intent.getStringExtra("refresh_token"));
+            this.view.lanzarActivityPrincipal(intent.getStringExtra("token"));
         }
     }
 
