@@ -26,8 +26,6 @@ public class ActivityPrincipal extends AppCompatActivity {
         intentPrevio = getIntent();
 
         presenter = new Principal(this);
-        configureBroadcastReceiver();
-
         buttonVerTorneos = findViewById(R.id.buttonVerTorneos);
         buttonVerRankings = findViewById(R.id.buttonVerRankings);
         buttonVerMetricas = findViewById(R.id.buttonVerMetricas);
@@ -53,14 +51,4 @@ public class ActivityPrincipal extends AppCompatActivity {
         });
     }
 
-    /**
-     * Metodo que registra un broadcast receiver para comunicar el servicio que recibe los
-     mensajes del servidor con el presenter de esta activity
-     la ejecute se llame automaticamente el OnReceive del presentador
-     * */
-    private void configureBroadcastReceiver() {
-        filtro = new IntentFilter("com.example.intentservice.intent.action.STOP_CHECK_TOKEN");
-        filtro.addCategory(Intent.CATEGORY_DEFAULT);
-        registerReceiver(presenter, filtro);
-    }
 }

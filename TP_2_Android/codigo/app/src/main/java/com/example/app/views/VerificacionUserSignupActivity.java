@@ -46,15 +46,45 @@ public class VerificacionUserSignupActivity extends AppCompatActivity {
 
         buttonSignup.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                presenter.setNombre(editTextNombre.getText().toString());
-                presenter.setApellido(editTextApellido.getText().toString());
-                presenter.setDni(editTextDNI.getText().toString());
-                presenter.setEmail(editTextMail.getText().toString());
-                presenter.setPass(editTextPass.getText().toString());
-                presenter.setComision(editTextComision.getText().toString());
-                presenter.setGrupo(editTextGrupo.getText().toString());
-                // Intento registrarme, en caso de poder vuelvo a la actividad del login
-                presenter.signUp();
+                if (editTextNombre.getText().toString().matches("")) {
+                    Toast.makeText(getApplicationContext(), "No ingreso un Nombre", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (editTextApellido.getText().toString().matches("")) {
+                    Toast.makeText(getApplicationContext(), "No ingreso un Apellido", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (editTextDNI.getText().toString().matches("")) {
+                    Toast.makeText(getApplicationContext(), "No ingreso un DNI", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (editTextMail.getText().toString().matches("")) {
+                    Toast.makeText(getApplicationContext(), "No ingreso un Mail", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (editTextPass.getText().toString().matches("")) {
+                    Toast.makeText(getApplicationContext(), "No ingreso un Password", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (editTextComision.getText().toString().matches("")) {
+                    Toast.makeText(getApplicationContext(), "No ingreso una Comision", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (editTextGrupo.getText().toString().matches("")) {
+                    Toast.makeText(getApplicationContext(), "No ingreso un Grupo", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                else {
+                    presenter.setNombre(editTextNombre.getText().toString());
+                    presenter.setApellido(editTextApellido.getText().toString());
+                    presenter.setDni(editTextDNI.getText().toString());
+                    presenter.setEmail(editTextMail.getText().toString());
+                    presenter.setPass(editTextPass.getText().toString());
+                    presenter.setComision(editTextComision.getText().toString());
+                    presenter.setGrupo(editTextGrupo.getText().toString());
+                    // Intento registrarme, en caso de poder vuelvo a la actividad del login
+                    presenter.signUp();
+                }
             }
         });
     }
