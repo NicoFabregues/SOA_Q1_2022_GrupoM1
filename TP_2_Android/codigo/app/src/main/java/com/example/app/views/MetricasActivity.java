@@ -30,25 +30,15 @@ public class MetricasActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_metricas);
-        presenter = new Metricas(this);
-
-        db = new DatabaseHandler(this);
         listaMetricas = new ArrayList<>();
-        llenarLista();
-
         lista = findViewById(R.id.listaMetricas);
         arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, listaMetricas);
-
         lista.setAdapter(arrayAdapter);
+        presenter = new Metricas(this);
     }
 
-    private synchronized void llenarLista(){
-        List<Metrica> keys = db.getAllMetricas();
-
-        for (Metrica entry : keys){
-            listaMetricas.add(entry.toString());
-        }
-
+    public void agregarMetrica(String entry){
+            listaMetricas.add(entry);
     }
 
     @Override

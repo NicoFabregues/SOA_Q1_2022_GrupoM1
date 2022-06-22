@@ -3,6 +3,7 @@ package com.example.app.models;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 public class Metrica {
 
@@ -10,6 +11,7 @@ public class Metrica {
     private String user;
     private Date fecha;
     private final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
 
     public Metrica() {
     }
@@ -58,6 +60,7 @@ public class Metrica {
             e.printStackTrace();
         }
     }
+
 
     @Override
     public String toString() {
